@@ -11,6 +11,7 @@ import userRoutes from "./routes/userRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
 import workoutRoutes from "./routes/workoutRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
+import dietRoutes from "./routes/dietRoutes.js";
 import cors from "cors";
 
 // Configure environment variables
@@ -71,6 +72,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/logs", workoutRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/diet-suggestion", dietRoutes);
 
 // Start server
 app.listen(PORT, () => {

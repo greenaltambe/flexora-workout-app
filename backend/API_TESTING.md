@@ -223,6 +223,127 @@ curl -X POST http://localhost:8080/api/recommendations \
 
 ---
 
+## Diet Suggestion Routes
+
+### 5B. Get Diet Suggestions with Recipes (Spoonacular)
+
+**Protected Route** - Get macro targets and recipe recommendations
+
+```bash
+curl -X POST http://localhost:8080/api/diet-suggestion \
+  -H "Content-Type: application/json" \
+  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
+  -d '{
+    "diet_type": "keto",
+    "meal_type": "lunch"
+  }'
+```
+
+**Test Data Options:**
+
+**Keto Breakfast:**
+
+```json
+{
+	"diet_type": "keto",
+	"meal_type": "breakfast"
+}
+```
+
+**Vegetarian Lunch:**
+
+```json
+{
+	"diet_type": "vegetarian",
+	"meal_type": "lunch"
+}
+```
+
+**Mediterranean Dinner:**
+
+```json
+{
+	"diet_type": "mediterranean",
+	"meal_type": "dinner"
+}
+```
+
+**Vegan Breakfast:**
+
+```json
+{
+	"diet_type": "vegan",
+	"meal_type": "breakfast"
+}
+```
+
+**Paleo Lunch:**
+
+```json
+{
+	"diet_type": "paleo",
+	"meal_type": "lunch"
+}
+```
+
+**Standard Dinner:**
+
+```json
+{
+	"diet_type": "standard",
+	"meal_type": "dinner"
+}
+```
+
+**Available Diet Types:**
+
+-   `standard`
+-   `keto`
+-   `paleo`
+-   `vegetarian`
+-   `vegan`
+-   `mediterranean`
+-   `other`
+
+**Available Meal Types:**
+
+-   `breakfast`
+-   `lunch`
+-   `dinner`
+
+**Expected Response:**
+
+```json
+{
+	"success": true,
+	"macro_targets": {
+		"calories": 650,
+		"carbs": 15,
+		"proteins": 45,
+		"fats": 50
+	},
+	"recipes": [
+		{
+			"id": 716429,
+			"title": "Lemon Herb Baked Salmon",
+			"image": "https://img.spoonacular.com/recipes/716429-312x231.jpg"
+		},
+		{
+			"id": 644387,
+			"title": "Keto Chicken Skewers",
+			"image": "https://img.spoonacular.com/recipes/644387-312x231.jpg"
+		},
+		{
+			"id": 715446,
+			"title": "Avocado and Egg Salad",
+			"image": "https://img.spoonacular.com/recipes/715446-312x231.jpg"
+		}
+	]
+}
+```
+
+---
+
 ## Workout Logging Routes
 
 ### 6. Log a Completed Workout
@@ -682,15 +803,16 @@ Run with: `chmod +x test.sh && ./test.sh`
 
 ## API Summary
 
-| Method | Endpoint                | Auth Required | Description           |
-| ------ | ----------------------- | ------------- | --------------------- |
-| GET    | `/auth/google`          | No            | Initiate Google OAuth |
-| GET    | `/auth/google/callback` | No            | OAuth callback        |
-| GET    | `/auth/logout`          | No            | Logout user           |
-| GET    | `/api/user/me`          | Yes           | Get current user      |
-| POST   | `/api/user/onboard`     | Yes           | Complete onboarding   |
-| POST   | `/api/recommendations`  | Yes           | Get recommendations   |
-| POST   | `/api/logs`             | Yes           | Log workout           |
-| GET    | `/api/logs`             | Yes           | Get workout history   |
-| GET    | `/api/leaderboard`      | No            | Get top users         |
-| GET    | `/api/leaderboard/rank` | Yes           | Get user's rank       |
+| Method | Endpoint                | Auth Required | Description                   |
+| ------ | ----------------------- | ------------- | ----------------------------- |
+| GET    | `/auth/google`          | No            | Initiate Google OAuth         |
+| GET    | `/auth/google/callback` | No            | OAuth callback                |
+| GET    | `/auth/logout`          | No            | Logout user                   |
+| GET    | `/api/user/me`          | Yes           | Get current user              |
+| POST   | `/api/user/onboard`     | Yes           | Complete onboarding           |
+| POST   | `/api/recommendations`  | Yes           | Get ML recommendations        |
+| POST   | `/api/diet-suggestion`  | Yes           | Get diet & recipe suggestions |
+| POST   | `/api/logs`             | Yes           | Log workout                   |
+| GET    | `/api/logs`             | Yes           | Get workout history           |
+| GET    | `/api/leaderboard`      | No            | Get top users                 |
+| GET    | `/api/leaderboard/rank` | Yes           | Get user's rank               |
