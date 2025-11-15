@@ -8,6 +8,8 @@ const logWorkout = async (req, res) => {
 		const {
 			completedExercises,
 			notes,
+			workoutRating,
+			workoutNotes,
 			totalCaloriesBurned,
 			totalDuration,
 		} = req.body;
@@ -20,11 +22,24 @@ const logWorkout = async (req, res) => {
 			});
 		}
 
+		// Validate workout rating if provided
+		if (
+			workoutRating !== undefined &&
+			(workoutRating < 1 || workoutRating > 5)
+		) {
+			return res.status(400).json({
+				error: "Invalid workout rating",
+				message: "Workout rating must be between 1 and 5",
+			});
+		}
+
 		// Create and save workout log
 		const workoutLog = new WorkoutLog({
 			userId,
 			completedExercises,
-			notes,
+			notes: notes || workoutNotes, // Support both fields for backwards compatibility
+			workoutNotes,
+			workoutRating,
 			totalCaloriesBurned:
 				totalCaloriesBurned ||
 				completedExercises.reduce(

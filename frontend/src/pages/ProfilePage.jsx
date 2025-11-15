@@ -8,7 +8,10 @@ import {
 	MdSave,
 	MdClose,
 	MdCheckCircle,
+	MdLink,
+	MdLinkOff,
 } from "react-icons/md";
+import { SiGooglefit } from "react-icons/si";
 import useUserStore from "../store/userStore";
 import api from "../lib/api";
 
@@ -125,6 +128,35 @@ const ProfilePage = () => {
 	const [loadingSection, setLoadingSection] = useState(null);
 	const [successMessage, setSuccessMessage] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
+	const [disconnectingGoogleFit, setDisconnectingGoogleFit] = useState(false);
+
+	// Check URL parameters for Google Fit connection status
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+
+		if (params.get("connected") === "true") {
+			setSuccessMessage("✓ Google Fit connected successfully!");
+			setTimeout(() => setSuccessMessage(""), 5000);
+			// Clean up URL
+			window.history.replaceState({}, "", window.location.pathname);
+		} else if (params.get("error")) {
+			const error = params.get("error");
+			let errorMsg = "Failed to connect Google Fit. ";
+
+			if (error === "no_code") {
+				errorMsg += "No authorization code received.";
+			} else if (error === "user_not_found") {
+				errorMsg += "User session not found. Please log in again.";
+			} else {
+				errorMsg += "Please try again.";
+			}
+
+			setErrorMessage(errorMsg);
+			setTimeout(() => setErrorMessage(""), 5000);
+			// Clean up URL
+			window.history.replaceState({}, "", window.location.pathname);
+		}
+	}, []);
 
 	// Initialize state from user only on mount or when user becomes available
 	useEffect(() => {
@@ -278,6 +310,40 @@ const ProfilePage = () => {
 		}
 		setEditing((e) => ({ ...e, [section]: false }));
 		setErrorMessage("");
+	};
+
+	// Handle Google Fit Disconnect
+	const handleGoogleFitDisconnect = async () => {
+		setDisconnectingGoogleFit(true);
+		setErrorMessage("");
+
+		try {
+			const response = await api.post("/connect/google-fit/disconnect");
+
+			if (response.data?.success) {
+				// Update user state in Zustand to reflect disconnection
+				updateUserInStore({
+					...user,
+					isGoogleFitConnected: false,
+					googleFitTokens: {
+						accessToken: null,
+						refreshToken: null,
+						expiryDate: null,
+					},
+				});
+				setSuccessMessage("Google Fit disconnected successfully!");
+				setTimeout(() => setSuccessMessage(""), 3000);
+			}
+		} catch (err) {
+			console.error("Failed to disconnect Google Fit:", err);
+			setErrorMessage(
+				err.response?.data?.message ||
+					"Failed to disconnect Google Fit. Please try again."
+			);
+			setTimeout(() => setErrorMessage(""), 5000);
+		} finally {
+			setDisconnectingGoogleFit(false);
+		}
 	};
 
 	if (!user) {
@@ -863,6 +929,117 @@ const ProfilePage = () => {
 							)}
 						</SectionCard>
 					</div>
+				</div>
+
+				{/* Integrations Section */}
+				<div className="mt-8">
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.4, delay: 0.2 }}
+						className="bg-card/80 backdrop-blur-xl p-6 rounded-2xl shadow-xl border border-gray-800 hover:border-gray-700 transition-all"
+					>
+						<div className="flex items-center gap-3 mb-6">
+							<MdLink className="text-primary" size={24} />
+							<h2 className="text-xl font-semibold text-white">
+								Integrations
+							</h2>
+						</div>
+
+						{/* Google Fit Integration Card */}
+						<motion.div
+							whileHover={{ scale: 1.01 }}
+							transition={{ duration: 0.2 }}
+							className="bg-background/50 rounded-xl p-6 border border-gray-700 hover:border-primary/30 transition-all"
+						>
+							<div className="flex items-start justify-between gap-4">
+								<div className="flex items-start gap-4 flex-1">
+									{/* Google Fit Icon */}
+									<div className="flex-shrink-0">
+										<div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center">
+											<SiGooglefit
+												className="text-white"
+												size={28}
+											/>
+										</div>
+									</div>
+
+									{/* Content */}
+									<div className="flex-1">
+										<h3 className="text-lg font-bold text-white mb-2">
+											Google Fit
+										</h3>
+										<p className="text-sm text-text-secondary mb-4">
+											Connect to automatically sync your
+											weight and log your Flexora workouts
+											to your Google Fit journal. Keep all
+											your fitness data in one place.
+										</p>
+
+										{user.isGoogleFitConnected ? (
+											<div className="flex items-center gap-4">
+												<div className="flex items-center gap-2 text-green-500">
+													<MdCheckCircle size={20} />
+													<span className="text-sm font-medium">
+														Successfully connected
+													</span>
+												</div>
+												<motion.button
+													whileHover={{ scale: 1.05 }}
+													whileTap={{ scale: 0.95 }}
+													onClick={
+														handleGoogleFitDisconnect
+													}
+													disabled={
+														disconnectingGoogleFit
+													}
+													className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+												>
+													{disconnectingGoogleFit ? (
+														<>
+															<motion.div
+																animate={{
+																	rotate: 360,
+																}}
+																transition={{
+																	duration: 1,
+																	repeat: Infinity,
+																	ease: "linear",
+																}}
+																className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full"
+															/>
+															<span>
+																Disconnecting...
+															</span>
+														</>
+													) : (
+														<>
+															<MdLinkOff
+																size={18}
+															/>
+															<span>
+																Disconnect
+															</span>
+														</>
+													)}
+												</motion.button>
+											</div>
+										) : (
+											<motion.a
+												href="http://localhost:8080/connect/google-fit"
+												whileHover={{ scale: 1.05 }}
+												whileTap={{ scale: 0.95 }}
+												className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white font-semibold rounded-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all"
+											>
+												<MdLink size={20} />
+												<span>Connect Google Fit</span>
+											</motion.a>
+										)}
+									</div>
+								</div>
+							</div>
+						</motion.div>
+					</motion.div>
 				</div>
 			</div>
 		</div>

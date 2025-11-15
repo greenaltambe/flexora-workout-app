@@ -40,6 +40,16 @@ const workoutLogSchema = new mongoose.Schema({
 		type: Number, // in minutes
 		default: 0,
 	},
+	workoutRating: {
+		type: Number,
+		min: 1,
+		max: 5,
+	},
+	workoutNotes: {
+		type: String,
+		maxLength: 500,
+	},
+	// Legacy field for backwards compatibility
 	notes: {
 		type: String,
 	},

@@ -86,12 +86,11 @@ const LogWorkout = () => {
 				completedExercises,
 				totalCaloriesBurned,
 				totalDuration,
-				notes: notes.trim() || undefined,
-				rating: rating > 0 ? rating : undefined,
+				workoutNotes: notes.trim() || undefined,
+				workoutRating: rating > 0 ? rating : undefined,
 			};
 
 			const response = await api.post("/api/logs", payload);
-
 			if (response.data.success) {
 				// Update user gamification data in store
 				if (response.data.gamification) {
