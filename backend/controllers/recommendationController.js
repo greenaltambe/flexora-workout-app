@@ -14,30 +14,32 @@ const getRecommendations = async (req, res) => {
 			});
 		}
 
-		// Construct payload for ML API
+		// Construct payload for ML API (matching the exact field names)
 		const payload = {
 			Age: user.age,
-			Gender: user.gender,
-			Weight: user.weightKg,
-			Height: user.heightM,
-			Max_BPM: user.maxBPM || 180, // Default if not set
-			Avg_BPM: user.avgBPM || 120, // Default if not set
-			Resting_BPM: user.restingBPM || 70, // Default if not set
-			Session_Duration: user.sessionDuration || 60, // Default if not set
-			Calories_Burned: user.caloriesBurned || 300, // Default if not set
-			Workout_Type: user.primaryWorkoutType || "cardio",
+			Gender: user.gender.charAt(0).toUpperCase() + user.gender.slice(1), // Capitalize first letter
+			"Weight (kg)": user.weightKg,
+			"Height (m)": user.heightM,
 			Fat_Percentage: user.bodyFatPercentage || 20,
-			Water_Intake: user.waterIntake || 2.5, // Default if not set
-			Workout_Frequency: user.workoutFrequency || 3,
 			Experience_Level: user.experienceLevel || 1,
-			BMI: user.weightKg / (user.heightM * user.heightM), // Calculate BMI
-			meal_type: meal_type || "lunch",
+			"Workout_Frequency (days/week)": user.workoutFrequency || 3,
+			Workout_Type:
+				user.primaryWorkoutType.charAt(0).toUpperCase() +
+				user.primaryWorkoutType.slice(1), // Capitalize first letter
+			diet_type:
+				user.primaryDietType.charAt(0).toUpperCase() +
+				user.primaryDietType.slice(1), // Capitalize first letter
+			meal_type:
+				(meal_type || "lunch").charAt(0).toUpperCase() +
+				(meal_type || "lunch").slice(1), // Capitalize first letter
 		};
 
-		// Call ML API
 		console.log("📤 Sending request to ML API:", process.env.ML_API_URL);
+		console.log("📦 Payload:", JSON.stringify(payload, null, 2));
+
+		// Call ML API
 		const response = await axios.post(
-			`${process.env.ML_API_URL}/recommend`,
+			`${process.env.ML_API_URL}/predict`,
 			payload,
 			{
 				headers: {
@@ -68,6 +70,12 @@ const getRecommendations = async (req, res) => {
 		});
 	} catch (error) {
 		console.error("❌ Error getting recommendations:", error.message);
+
+		// Log more details for debugging
+		if (error.response) {
+			console.error("Response status:", error.response.status);
+			console.error("Response data:", error.response.data);
+		}
 
 		if (error.code === "ECONNREFUSED") {
 			return res.status(503).json({
