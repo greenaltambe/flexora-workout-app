@@ -70,7 +70,7 @@ const LogWorkout = () => {
 					exerciseName: exercise.exercise_name,
 					sets: exercise.sets,
 					reps: exercise.reps,
-					caloriesBurned: exercise.calories_burned,
+					caloriesBurned: exercise.calories_per_30min || 0,
 				}));
 
 			// Calculate total calories and duration
@@ -197,17 +197,23 @@ const LogWorkout = () => {
 
 									<div className="bg-orange-500/10 border border-orange-500/30 rounded-lg px-4 py-2">
 										<div className="text-lg font-bold text-orange-500">
-											{exercise.calories_burned}
+											{exercise.calories_per_30min
+												? Math.round(
+														exercise.calories_per_30min
+												  )
+												: "N/A"}
 										</div>
 										<div className="text-xs text-text-secondary">
-											Calories
+											kcal / 30min
 										</div>
 									</div>
 
-									{exercise.target_muscle && (
+									{(exercise.target_muscle_group ||
+										exercise.target_muscle) && (
 										<div className="bg-blue-500/10 border border-blue-500/30 rounded-lg px-4 py-2">
 											<div className="text-lg font-bold text-blue-500">
-												{exercise.target_muscle}
+												{exercise.target_muscle_group ||
+													exercise.target_muscle}
 											</div>
 											<div className="text-xs text-text-secondary">
 												Target Muscle
