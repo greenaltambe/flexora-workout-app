@@ -1,256 +1,710 @@
-# Flexora Frontend 🏋️‍♂️
+# Flexora Frontend# Flexora Frontend 🏋️‍♂️
 
-A modern, animated fitness tracking application built with React, Vite, and Tailwind CSS v4.
+Modern fitness tracking application built with React, featuring ML-powered recommendations and beautiful animations.A modern, animated fitness tracking application built with React, Vite, and Tailwind CSS v4.
 
-## ✨ Features
+## Features## ✨ Features
 
-### 🔐 Authentication
+-   🔐 **Google OAuth Authentication** - Secure session-based login### 🔐 Authentication
 
--   **Google OAuth** integration
--   Session-based authentication with cookies
--   Protected routes with automatic redirects
+-   🤖 **ML-Powered Recommendations** - Personalized workouts and diet plans
 
-### 🎨 Beautiful UI/UX
+-   📊 **Dashboard** - Exercise cards, meal suggestions, calorie tracking- **Google OAuth** integration
+
+-   💪 **Workout Logging** - Confirm and save workouts with ratings and notes- Session-based authentication with cookies
+
+-   📜 **History** - View past workouts with filters- Protected routes with automatic redirects
+
+-   🏆 **Leaderboard** - Gamification with XP and rankings
+
+-   👤 **Profile Management** - Update fitness goals and preferences### 🎨 Beautiful UI/UX
+
+-   ✨ **Smooth Animations** - Framer Motion transitions throughout
 
 -   **Modern Design**: Dark theme with custom color palette
--   **Smooth Animations**: Framer Motion for all transitions
+
+## Tech Stack- **Smooth Animations**: Framer Motion for all transitions
+
 -   **Glassmorphism**: Backdrop blur effects
--   **Responsive**: Mobile-first design
 
-### 📱 Pages
+-   **Framework:** React 18- **Responsive**: Mobile-first design
 
-#### 1. Login Page (`/login`)
+-   **Build Tool:** Vite 6.2
 
--   Animated logo and background effects
--   Google Sign-In button
--   Feature showcase with staggered animations
+-   **Routing:** React Router v6### 📱 Pages
 
-#### 2. Onboarding Page (`/onboarding`)
+-   **State Management:** Zustand
 
--   **React Hook Form** for validation
--   Clickable experience level cards (Beginner/Intermediate/Advanced)
+-   **Styling:** Tailwind CSS v4#### 1. Login Page (`/login`)
+
+-   **Animations:** Framer Motion
+
+-   **HTTP Client:** Axios- Animated logo and background effects
+
+-   **Icons:** react-icons- Google Sign-In button
+
+-   **Forms:** React Hook Form (onboarding)- Feature showcase with staggered animations
+
+## Prerequisites#### 2. Onboarding Page (`/onboarding`)
+
+-   Node.js 18+ or higher- **React Hook Form** for validation
+
+-   pnpm (recommended) or npm- Clickable experience level cards (Beginner/Intermediate/Advanced)
+
 -   Interactive workout frequency slider (1-7 days)
--   Complete user profile collection
+
+## Installation- Complete user profile collection
+
 -   Beautiful form animations
 
-#### 3. Dashboard Page (`/dashboard`) ⭐ NEW
+1. **Navigate to frontend directory:**
 
--   **Personalized Greeting** with user's name
+```bash#### 3. Dashboard Page (`/dashboard`) ⭐ NEW
+
+cd flexora/frontend
+
+````- **Personalized Greeting** with user's name
+
 -   **Meal Type Selector**: Choose between Breakfast, Lunch, Dinner, or Snack
--   **Exercise Recommendations**:
-    -   Horizontal scrolling cards on desktop
-    -   Each card shows: Exercise name, Sets × Reps, Calories burned
-    -   Expandable details for target muscle, equipment, and benefits
--   **Meal Suggestion Card**:
-    -   Large calorie display
+
+2. **Install dependencies:**-   **Exercise Recommendations**:
+
+```bash    -   Horizontal scrolling cards on desktop
+
+pnpm install    -   Each card shows: Exercise name, Sets × Reps, Calories burned
+
+# or    -   Expandable details for target muscle, equipment, and benefits
+
+npm install-   **Meal Suggestion Card**:
+
+```    -   Large calorie display
+
     -   Animated macronutrient breakdown (Protein, Carbs, Fats)
-    -   Progress bars with smooth fill animations
--   **Start Workout Button**: Large CTA for workout logging
 
-#### 4. History Page (`/history`)
+3. **Create environment file:**    -   Progress bars with smooth fill animations
 
--   Coming soon: Workout history with filtering
+```bash-   **Start Workout Button**: Large CTA for workout logging
 
-#### 5. Leaderboard Page (`/leaderboard`)
+touch .env
+
+```#### 4. History Page (`/history`)
+
+
+
+4. **Configure environment variables:**-   Coming soon: Workout history with filtering
+
+```env
+
+VITE_API_URL=http://localhost:3000#### 5. Leaderboard Page (`/leaderboard`)
+
+````
 
 -   Coming soon: Global rankings and user stats
 
+## Running the Application
+
 ### 🎭 Animations
 
--   **Stagger animations** on page load
--   **Hover effects** on buttons and cards
--   **Smooth transitions** between states
--   **Animated progress bars** for macros
--   **Expandable sections** with height animations
+### Development Mode:
 
-### 🗂️ State Management
+````bash- **Stagger animations** on page load
 
--   **Zustand** for global user state
--   Lightweight and performant
--   Simple API: `loginUser`, `logoutUser`, `updateUser`
+pnpm dev-   **Hover effects** on buttons and cards
 
-### 🔌 API Integration
+# or-   **Smooth transitions** between states
 
--   **Axios** client with base URL configuration
--   Session cookie support (`withCredentials: true`)
--   Error handling and loading states
--   Backend API: `http://localhost:8080`
+npm run dev-   **Animated progress bars** for macros
+
+```-   **Expandable sections** with height animations
+
+
+
+Application runs on `http://localhost:5173`### 🗂️ State Management
+
+
+
+### Production Build:-   **Zustand** for global user state
+
+```bash-   Lightweight and performant
+
+pnpm build-   Simple API: `loginUser`, `logoutUser`, `updateUser`
+
+npm run build
+
+```### 🔌 API Integration
+
+
+
+### Preview Production Build:-   **Axios** client with base URL configuration
+
+```bash-   Session cookie support (`withCredentials: true`)
+
+pnpm preview-   Error handling and loading states
+
+npm run preview-   Backend API: `http://localhost:8080`
+
+````
 
 ## 🚀 Quick Start
 
+## Project Structure
+
 ### Prerequisites
 
--   Node.js 18+
--   pnpm (recommended) or npm
--   Backend API running on `http://localhost:8080`
+````
 
-### Installation
+frontend/-   Node.js 18+
 
-```bash
-# Install dependencies
-pnpm install
+├── src/-   pnpm (recommended) or npm
 
-# Start development server
-pnpm dev
+│   ├── App.jsx                    # Main app component with routing-   Backend API running on `http://localhost:8080`
 
-# Open in browser
-# http://localhost:5173
-```
+│   ├── main.jsx                   # Entry point
 
-### Build for Production
+│   ├── App.css                    # Global styles### Installation
 
-```bash
-# Create optimized build
-pnpm build
+│   ├── index.css                  # Tailwind imports
 
-# Preview production build
-pnpm preview
-```
+│   │```bash
 
-## 🛠️ Tech Stack
+│   ├── components/# Install dependencies
 
-| Technology          | Version | Purpose                 |
-| ------------------- | ------- | ----------------------- |
-| **React**           | 18.3+   | UI library              |
-| **Vite**            | 7.2.2   | Build tool & dev server |
-| **Tailwind CSS**    | 4.1.17  | Styling framework       |
-| **Framer Motion**   | 12.23+  | Animations              |
-| **Zustand**         | 5.0+    | State management        |
-| **React Router**    | 7.9+    | Client-side routing     |
-| **Axios**           | 1.13+   | HTTP client             |
-| **React Hook Form** | Latest  | Form validation         |
-| **React Icons**     | 5.5+    | Icon library            |
+│   │   ├── Layout.jsx             # Main layout with sidebarpnpm install
 
-## 📁 Project Structure
+│   │   ├── Sidebar.jsx            # Navigation sidebar
 
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── Layout.jsx           # Main layout with sidebar
-│   │   ├── Sidebar.jsx          # Responsive navigation
-│   │   └── ProtectedRoute.jsx   # Route guard
+│   │   └── ProtectedRoute.jsx    # Auth guard for routes# Start development server
+
+│   │pnpm dev
+
 │   ├── pages/
-│   │   ├── Login.jsx            # Google OAuth login
-│   │   ├── Onboarding.jsx       # Profile completion
-│   │   ├── Dashboard.jsx        # Main dashboard ⭐
-│   │   ├── History.jsx          # Workout history
-│   │   └── Leaderboard.jsx      # User rankings
-│   ├── store/
-│   │   └── userStore.js         # Zustand user store
-│   ├── lib/
-│   │   └── api.js               # Axios instance
-│   ├── App.jsx                  # Routing configuration
-│   ├── main.jsx                 # React entry point
-│   └── index.css                # Global styles
-├── public/                      # Static assets
-├── tailwind.config.js           # Tailwind configuration
-├── vite.config.js               # Vite configuration
-└── package.json
-```
 
-## 🎨 Design System
+│   │   ├── Login.jsx              # Google OAuth login# Open in browser
 
-### Colors
+│   │   ├── Onboarding.jsx         # User profile setup# http://localhost:5173
 
-```javascript
-{
-  background: '#0a0a0a',      // Dark background
-  card: '#1a1a1a',            // Card background
-  primary: '#3b82f6',         // Primary blue
-  'primary-hover': '#2563eb', // Primary hover
-  'text-primary': '#f5f5f5',  // White text
-  'text-secondary': '#a1a1aa' // Gray text
-}
-```
+│   │   ├── Dashboard.jsx          # Main dashboard```
 
-### Typography
+│   │   ├── LogWorkout.jsx         # Workout confirmation
 
--   Font: System font stack with sans-serif fallback
--   Headings: Bold, large sizes (3xl-5xl)
--   Body: Regular weight, readable sizes (sm-lg)
+│   │   ├── History.jsx            # Workout history### Build for Production
 
-## 📚 Documentation
+│   │   ├── Leaderboard.jsx        # User rankings
 
--   **[FRONTEND_SETUP.md](./FRONTEND_SETUP.md)**: Complete setup guide
--   **[DASHBOARD_FEATURES.md](./DASHBOARD_FEATURES.md)**: Dashboard documentation ⭐
--   **[QUICKSTART.md](./QUICKSTART.md)**: Quick reference
--   **[COMMANDS.md](./COMMANDS.md)**: All available commands
--   **[STRUCTURE.md](./STRUCTURE.md)**: Folder structure details
--   **[Backend_API.md](./Backend_API.md)**: Backend API reference
+│   │   └── ProfilePage.jsx        # User profile settings```bash
 
-## 🔗 Backend Integration
+│   │# Create optimized build
 
-### Required Endpoints
+│   ├── lib/pnpm build
 
--   `GET /auth/google` - Google OAuth login
--   `POST /api/user/onboard` - Complete user profile
--   `POST /api/recommendations` - Get personalized recommendations ⭐
--   `POST /api/logs` - Log workout
--   `GET /api/logs` - Get workout history
--   `GET /api/leaderboard` - Get top users
--   `GET /api/user/me` - Get current user
+│   │   └── api.js                 # Axios instance with config
+
+│   │# Preview production build
+
+│   ├── store/pnpm preview
+
+│   │   └── userStore.js           # Zustand global state```
+
+│   │
+
+│   └── assets/                    # Static assets## 🛠️ Tech Stack
+
+│
+
+├── public/                        # Public static files| Technology          | Version | Purpose                 |
+
+├── index.html                     # HTML entry point| ------------------- | ------- | ----------------------- |
+
+├── vite.config.js                 # Vite configuration| **React**           | 18.3+   | UI library              |
+
+├── tailwind.config.js             # Tailwind CSS config| **Vite**            | 7.2.2   | Build tool & dev server |
+
+├── eslint.config.js               # ESLint configuration| **Tailwind CSS**    | 4.1.17  | Styling framework       |
+
+├── package.json                   # Dependencies| **Framer Motion**   | 12.23+  | Animations              |
+
+└── README.md                      # This file| **Zustand**         | 5.0+    | State management        |
+
+```| **React Router**    | 7.9+    | Client-side routing     |
+
+| **Axios**           | 1.13+   | HTTP client             |
+
+## Key Components| **React Hook Form** | Latest  | Form validation         |
+
+| **React Icons**     | 5.5+    | Icon library            |
 
 ### Authentication Flow
 
+## 📁 Project Structure
+
+1. **Login (`/login`)**
+
+   - Google OAuth button```
+
+   - Redirects to backend `/auth/google`frontend/
+
+   - Backend handles OAuth and redirects back to `/dashboard`├── src/
+
+│   ├── components/
+
+2. **Protected Routes**│   │   ├── Layout.jsx           # Main layout with sidebar
+
+   - Uses `ProtectedRoute` wrapper component│   │   ├── Sidebar.jsx          # Responsive navigation
+
+   - Checks user session via `/auth/me`│   │   └── ProtectedRoute.jsx   # Route guard
+
+   - Redirects unauthenticated users to `/login`│   ├── pages/
+
+│   │   ├── Login.jsx            # Google OAuth login
+
+3. **Onboarding (`/onboarding`)**│   │   ├── Onboarding.jsx       # Profile completion
+
+   - Collects user profile data│   │   ├── Dashboard.jsx        # Main dashboard ⭐
+
+   - Experience level selection (Beginner/Intermediate/Advanced)│   │   ├── History.jsx          # Workout history
+
+   - Workout frequency slider│   │   └── Leaderboard.jsx      # User rankings
+
+   - Workout type preference│   ├── store/
+
+   - Submits to `/user/onboard`│   │   └── userStore.js         # Zustand user store
+
+│   ├── lib/
+
+### Dashboard (`/dashboard`)│   │   └── api.js               # Axios instance
+
+│   ├── App.jsx                  # Routing configuration
+
+Main page showing personalized recommendations:│   ├── main.jsx                 # React entry point
+
+│   └── index.css                # Global styles
+
+**Features:**├── public/                      # Static assets
+
+- Personalized greeting with user's name├── tailwind.config.js           # Tailwind configuration
+
+- Meal type selector (Breakfast/Lunch/Dinner/Snack)├── vite.config.js               # Vite configuration
+
+- Exercise recommendations:└── package.json
+
+  - 4 cards with exercise details```
+
+  - Sets, reps, calories_per_30min
+
+  - Target muscle groups## 🎨 Design System
+
+  - Expandable exercise benefits
+
+- Diet suggestion card:### Colors
+
+  - Calorie display
+
+  - Macronutrient breakdown (Protein/Carbs/Fats)```javascript
+
+  - Animated progress bars{
+
+- "Start Workout" CTA button  background: '#0a0a0a',      // Dark background
+
+  card: '#1a1a1a',            // Card background
+
+**Data Flow:**  primary: '#3b82f6',         // Primary blue
+
+1. Fetches user profile on mount  'primary-hover': '#2563eb', // Primary hover
+
+2. Calls ML API `/predict` with user data + meal_type  'text-primary': '#f5f5f5',  // White text
+
+3. Caches recommendations in Zustand + localStorage  'text-secondary': '#a1a1aa' // Gray text
+
+4. Auto-refreshes daily (date-based cache validation)}
+
+````
+
+### Workout Logging (`/log-workout`)
+
+### Typography
+
+Workout confirmation and logging interface:
+
+-   Font: System font stack with sans-serif fallback
+
+**Features:**- Headings: Bold, large sizes (3xl-5xl)
+
+-   Displays today's recommended exercises- Body: Regular weight, readable sizes (sm-lg)
+
+-   Editable set/rep inputs for each exercise
+
+-   Total calories calculation## 📚 Documentation
+
+-   Workout rating (1-5 stars)
+
+-   Optional workout notes (500 char max)- **[FRONTEND_SETUP.md](./FRONTEND_SETUP.md)**: Complete setup guide
+
+-   Saves to backend `/workout/log`- **[DASHBOARD_FEATURES.md](./DASHBOARD_FEATURES.md)**: Dashboard documentation ⭐
+
+-   **[QUICKSTART.md](./QUICKSTART.md)**: Quick reference
+
+**Data Flow:**- **[COMMANDS.md](./COMMANDS.md)**: All available commands
+
+1. Loads recommendations from cache (via Dashboard)- **[STRUCTURE.md](./STRUCTURE.md)**: Folder structure details
+
+2. User confirms/edits exercise details- **[Backend_API.md](./Backend_API.md)**: Backend API reference
+
+3. User rates workout and adds notes
+
+4. Submits to backend## 🔗 Backend Integration
+
+5. Awards XP and updates leaderboard
+
+### Required Endpoints
+
+### History (`/history`)
+
+-   `GET /auth/google` - Google OAuth login
+
+View past workout logs:- `POST /api/user/onboard` - Complete user profile
+
+-   `POST /api/recommendations` - Get personalized recommendations ⭐
+
+**Features:**- `POST /api/logs` - Log workout
+
+-   List of all logged workouts- `GET /api/logs` - Get workout history
+
+-   Workout type filter- `GET /api/leaderboard` - Get top users
+
+-   Date-based filtering- `GET /api/user/me` - Get current user
+
+-   Workout details (exercises, sets, reps, ratings, notes)
+
+-   Total workout count### Authentication Flow
+
+-   Pagination support
+
 1. User clicks "Sign in with Google" on `/login`
-2. Backend handles OAuth and sets session cookie
-3. Frontend stores user data in Zustand
-4. Protected routes check `isAuthenticated`
+
+**Data Flow:**2. Backend handles OAuth and sets session cookie
+
+1. Fetches from `/workout/history` on mount3. Frontend stores user data in Zustand
+
+2. Client-side filtering by workout type4. Protected routes check `isAuthenticated`
+
+3. Displays sorted by date (newest first)
 
 ## 🎯 Roadmap
 
+### Leaderboard (`/leaderboard`)
+
 ### ✅ Completed
 
+Gamification and user rankings:
+
 -   [x] Authentication with Google OAuth
--   [x] Responsive sidebar navigation
--   [x] Login page with animations
--   [x] Onboarding form with validation
--   [x] Dashboard with recommendations ⭐
--   [x] Meal type selector
--   [x] Exercise cards with details
+
+**Features:**- [x] Responsive sidebar navigation
+
+-   Top 10 users by XP- [x] Login page with animations
+
+-   User rank display- [x] Onboarding form with validation
+
+-   Medal icons for top 3- [x] Dashboard with recommendations ⭐
+
+-   XP and workout count for each user- [x] Meal type selector
+
+-   Highlights current user's position- [x] Exercise cards with details
+
 -   [x] Meal suggestion with macros
 
-### 🚧 In Progress
+**Data Flow:**
 
--   [ ] Workout logging interface
+1. Fetches from `/leaderboard` on mount### 🚧 In Progress
+
+2. Backend calculates rankings from workout logs
+
+3. XP awarded per workout (10 XP per log)- [ ] Workout logging interface
+
 -   [ ] History page with filtering
--   [ ] Leaderboard page
 
-### 📅 Planned
+### Profile Page (`/profile`)- [ ] Leaderboard page
 
--   [ ] User profile editing
--   [ ] Progress charts and graphs
--   [ ] Exercise video tutorials
--   [ ] Social features (share workouts)
--   [ ] Dark/light theme toggle
--   [ ] PWA support
+User profile management:### 📅 Planned
+
+**Features:**- [ ] User profile editing
+
+-   Display current profile information- [ ] Progress charts and graphs
+
+-   Edit profile form- [ ] Exercise video tutorials
+
+-   Update workout preferences- [ ] Social features (share workouts)
+
+-   Google Fit integration section (disabled)- [ ] Dark/light theme toggle
+
+-   Logout button- [ ] PWA support
+
 -   [ ] Push notifications
 
-## 🐛 Known Issues
+**Data Flow:**
 
-1. **Exercise Details**: Some fields (target muscle, equipment, benefits) use placeholder data
-2. **Start Workout**: Only logs to console (UI pending)
-3. **No Offline Support**: Requires active internet connection
+1. Loads user data from Zustand store## 🐛 Known Issues
 
-## 🤝 Contributing
+2. Updates via `/user/update`
 
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
+3. Refreshes user context after save1. **Exercise Details**: Some fields (target muscle, equipment, benefits) use placeholder data
 
-## 📄 License
+4. **Start Workout**: Only logs to console (UI pending)
 
-MIT License - See LICENSE file for details
+## State Management3. **No Offline Support**: Requires active internet connection
 
-## 🙏 Acknowledgments
+### Zustand Store (`userStore.js`)## 🤝 Contributing
 
--   [Vite](https://vite.dev/) for blazing fast development
--   [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
--   [Framer Motion](https://www.framer.com/motion/) for animations
--   [Zustand](https://zustand.docs.pmnd.rs/) for state management
+**State:**1. Create a feature branch
 
----
+````javascript2. Make your changes
+
+{3. Test thoroughly
+
+  user: null,                    // User profile object4. Submit a pull request
+
+  isAuthenticated: false,        // Auth status
+
+  isLoading: true,              // Loading state## 📄 License
+
+  todaysWorkout: null,          // Cached ML recommendations
+
+  workoutCacheDate: null        // Cache timestampMIT License - See LICENSE file for details
+
+}
+
+```## 🙏 Acknowledgments
+
+
+
+**Actions:**-   [Vite](https://vite.dev/) for blazing fast development
+
+- `setUser(user)` - Set user profile-   [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
+
+- `clearUser()` - Clear user on logout-   [Framer Motion](https://www.framer.com/motion/) for animations
+
+- `setTodaysWorkout(workout, date)` - Cache recommendations-   [Zustand](https://zustand.docs.pmnd.rs/) for state management
+
+- `clearTodaysWorkout()` - Clear workout cache
+
+- `checkAuth()` - Verify session with backend---
+
+- `logout()` - End session
 
 **Made with ❤️ for fitness enthusiasts**
+
+**Persistence:**
+- User data saved to localStorage
+- Workout cache saved with date validation
+- Auto-loads on app initialization
+
+## Styling
+
+### Tailwind CSS v4
+
+**Custom Configuration:**
+- Dark theme by default
+- Custom color palette (primary: cyan)
+- Glassmorphism utilities (backdrop-blur)
+- Custom animations (fade-in, slide-up)
+
+**Key Classes:**
+- `glass` - Glassmorphism effect
+- `card` - Standard card styling
+- `btn` - Button base styles
+- `btn-primary` - Primary CTA buttons
+
+### Framer Motion
+
+**Animation Patterns:**
+- Page transitions: `fadeIn` variants
+- Card animations: `stagger` with delay
+- Hover effects: `scale` and `brightness`
+- Loading states: `pulse` animation
+
+**Example:**
+```jsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+>
+  {content}
+</motion.div>
+````
+
+## API Integration
+
+### Axios Configuration (`lib/api.js`)
+
+```javascript
+const api = axios.create({
+	baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+	withCredentials: true, // Send cookies with requests
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
+```
+
+**Interceptors:**
+
+-   Response error handler
+-   Automatic redirect to `/login` on 401/403
+-   Toast notifications for errors
+
+### Backend Endpoints Used
+
+| Endpoint           | Method | Purpose               |
+| ------------------ | ------ | --------------------- |
+| `/auth/google`     | GET    | Initiate Google OAuth |
+| `/auth/me`         | GET    | Check session         |
+| `/auth/logout`     | POST   | End session           |
+| `/user/onboard`    | POST   | Submit user profile   |
+| `/user/update`     | PUT    | Update profile        |
+| `/recommendations` | POST   | Get ML predictions    |
+| `/workout/log`     | POST   | Log workout           |
+| `/workout/history` | GET    | Get workout logs      |
+| `/leaderboard`     | GET    | Get user rankings     |
+| `/diet/suggest`    | POST   | Get diet suggestions  |
+
+## Environment Variables
+
+```env
+# Backend API URL
+VITE_API_URL=http://localhost:3000
+
+# Optional: Google Analytics ID
+VITE_GA_ID=
+```
+
+## Development Workflow
+
+1. **Start backend server** (port 3000)
+2. **Start ML service** (port 5000)
+3. **Start frontend dev server** (port 5173)
+4. **Access app:** `http://localhost:5173`
+
+### Hot Module Replacement (HMR)
+
+-   Changes auto-reload in browser
+-   React Fast Refresh preserves state
+-   CSS updates without full reload
+
+### Linting
+
+```bash
+pnpm lint
+npm run lint
+```
+
+## Building for Production
+
+1. **Build static assets:**
+
+```bash
+pnpm build
+```
+
+Output: `dist/` directory
+
+2. **Preview production build:**
+
+```bash
+pnpm preview
+```
+
+3. **Deploy `dist/` folder:**
+
+-   Netlify, Vercel, or any static host
+-   Configure rewrites for SPA routing
+-   Set environment variables on hosting platform
+
+## Troubleshooting
+
+### Authentication Issues
+
+-   **Problem:** Can't log in with Google
+-   **Solution:**
+    -   Check backend Google OAuth credentials
+    -   Verify redirect URIs in Google Console
+    -   Ensure cookies are enabled
+
+### API Connection Errors
+
+-   **Problem:** Network errors on API calls
+-   **Solution:**
+    -   Verify backend is running on port 3000
+    -   Check VITE_API_URL environment variable
+    -   Ensure CORS is enabled on backend
+
+### Cache Not Refreshing
+
+-   **Problem:** Stale workout recommendations
+-   **Solution:**
+    -   Clear localStorage in browser DevTools
+    -   Check date comparison logic in `userStore.js`
+    -   Verify ML API is returning data
+
+### Build Errors
+
+-   **Problem:** Build fails with dependency errors
+-   **Solution:**
+    -   Delete `node_modules` and `pnpm-lock.yaml`
+    -   Run `pnpm install` again
+    -   Check Node.js version (18+ required)
+
+## Testing
+
+### Manual Testing Checklist
+
+-   [ ] Login with Google OAuth
+-   [ ] Complete onboarding flow
+-   [ ] View dashboard recommendations
+-   [ ] Change meal type selector
+-   [ ] Log a workout with rating and notes
+-   [ ] View workout history
+-   [ ] Check leaderboard rankings
+-   [ ] Update profile information
+-   [ ] Logout and verify session cleared
+
+### Browser Compatibility
+
+-   Chrome 90+
+-   Firefox 88+
+-   Safari 14+
+-   Edge 90+
+
+## Performance Optimization
+
+-   **Code Splitting:** React.lazy for route-based splitting
+-   **Image Optimization:** WebP format in public assets
+-   **Bundle Size:** Tree-shaking with Vite
+-   **Caching:** Service worker for offline support (future)
+
+## Future Enhancements
+
+-   [ ] Real-time workout tracking with timer
+-   [ ] Exercise video demonstrations
+-   [ ] Social features (follow users, share workouts)
+-   [ ] Progressive Web App (PWA) support
+-   [ ] Dark/Light theme toggle
+-   [ ] Multi-language support
+-   [ ] Workout streak tracking
+-   [ ] Custom workout builder
+-   [ ] Integration with fitness wearables
+-   [ ] Exercise form analysis (computer vision)
+
+## Contributing
+
+1. Create feature branch
+2. Make changes
+3. Test thoroughly
+4. Submit pull request
+
+## License
+
+MIT License
+
+## Support
+
+For issues or questions, please open an issue in the repository.
