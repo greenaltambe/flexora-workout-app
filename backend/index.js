@@ -1,22 +1,22 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const cookieParser = require("cookie-parser");
+import express from "express";
+import dotenv from "dotenv";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import { passport, configurePassport } from "./config/passport.js";
+import connectDB from "./config/database.js";
+
+// Import routes
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 // Configure environment variables
 dotenv.config();
 
 // Connect to MongoDB
-mongoose
-	.connect(process.env.MONGO_URI)
-	.then(() => {
-		console.log("✅ Successfully connected to MongoDB");
-	})
-	.catch((error) => {
-		console.error("❌ MongoDB connection error:", error);
-		process.exit(1);
-	});
+connectDB();
+
+// Configure Passport
+configurePassport();
 
 // Initialize Express app
 const app = express();
@@ -39,6 +39,10 @@ app.use(
 	})
 );
 
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Define PORT
 const PORT = process.env.PORT || 8080;
 
@@ -50,6 +54,10 @@ app.get("/", (req, res) => {
 		status: "running",
 	});
 });
+
+// Routes
+app.use("/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 // Start server
 app.listen(PORT, () => {
