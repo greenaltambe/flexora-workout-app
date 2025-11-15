@@ -192,23 +192,30 @@ const Dashboard = () => {
 												</div>
 											</div>
 
-											<div className="flex items-center justify-center gap-2 text-orange-500">
-												<MdLocalFireDepartment
-													size={20}
-												/>
-												<span className="text-sm font-semibold">
-													{exercise.calories_burned}{" "}
-													calories
-												</span>
-											</div>
+											{exercise.calories_per_30min && (
+												<div className="flex items-center justify-center gap-2 text-orange-500 mb-3">
+													<MdLocalFireDepartment
+														size={20}
+													/>
+													<span className="text-sm font-semibold">
+														~
+														{Math.round(
+															exercise.calories_per_30min
+														)}{" "}
+														kcal / 30 min
+													</span>
+												</div>
+											)}
 
-											{exercise.target_muscle && (
+											{(exercise.target_muscle_group ||
+												exercise.target_muscle) && (
 												<div className="mt-3 pt-3 border-t border-gray-700">
 													<p className="text-xs text-text-secondary">
 														<span className="font-semibold text-white">
 															Target:
 														</span>{" "}
-														{exercise.target_muscle}
+														{exercise.target_muscle_group ||
+															exercise.target_muscle}
 													</p>
 												</div>
 											)}

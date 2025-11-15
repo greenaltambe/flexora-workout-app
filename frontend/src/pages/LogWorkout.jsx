@@ -15,12 +15,15 @@ const LogWorkout = () => {
 	const { todaysWorkout, updateUser } = useUserStore();
 	const navigate = useNavigate();
 
+	// Extract the workout array from the todaysWorkout object
+	const workoutExercises = todaysWorkout?.workout || [];
+
 	// Local state for tracking checked exercises (all checked by default)
 	const [checkedExercises, setCheckedExercises] = useState(
-		todaysWorkout?.reduce((acc, exercise, index) => {
+		workoutExercises.reduce((acc, exercise, index) => {
 			acc[index] = true;
 			return acc;
-		}, {}) || {}
+		}, {})
 	);
 
 	const [notes, setNotes] = useState("");
@@ -29,7 +32,7 @@ const LogWorkout = () => {
 	const [error, setError] = useState("");
 
 	// If no workout data, redirect back to dashboard
-	if (!todaysWorkout || todaysWorkout.length === 0) {
+	if (!workoutExercises || workoutExercises.length === 0) {
 		navigate("/dashboard");
 		return null;
 	}
@@ -61,7 +64,7 @@ const LogWorkout = () => {
 
 		try {
 			// Build the completed exercises array
-			const completedExercises = todaysWorkout
+			const completedExercises = workoutExercises
 				.filter((_, index) => checkedExercises[index])
 				.map((exercise) => ({
 					exerciseName: exercise.exercise_name,
@@ -151,7 +154,7 @@ const LogWorkout = () => {
 				animate="visible"
 				className="space-y-4 mb-8"
 			>
-				{todaysWorkout.map((exercise, index) => (
+				{workoutExercises.map((exercise, index) => (
 					<motion.div
 						key={index}
 						variants={cardVariants}
