@@ -57,6 +57,37 @@ const userSchema = new mongoose.Schema({
 		max: 100,
 	},
 
+	// Additional Health Metrics (for ML API)
+	maxBPM: {
+		type: Number,
+		min: 100,
+		max: 220,
+	},
+	avgBPM: {
+		type: Number,
+		min: 60,
+		max: 200,
+	},
+	restingBPM: {
+		type: Number,
+		min: 40,
+		max: 100,
+	},
+	sessionDuration: {
+		type: Number, // Average workout duration in minutes
+		min: 0,
+		max: 300,
+	},
+	caloriesBurned: {
+		type: Number, // Average calories burned per session
+		min: 0,
+	},
+	waterIntake: {
+		type: Number, // Daily water intake in liters
+		min: 0,
+		max: 10,
+	},
+
 	// User Goals and Preferences
 	experienceLevel: {
 		type: Number,

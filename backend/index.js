@@ -8,6 +8,9 @@ import connectDB from "./config/database.js";
 // Import routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import recommendationRoutes from "./routes/recommendationRoutes.js";
+import workoutRoutes from "./routes/workoutRoutes.js";
+import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 
 // Configure environment variables
 dotenv.config();
@@ -58,6 +61,9 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/logs", workoutRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 // Start server
 app.listen(PORT, () => {
