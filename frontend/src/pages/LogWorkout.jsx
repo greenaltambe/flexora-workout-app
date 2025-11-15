@@ -64,15 +64,15 @@ const LogWorkout = () => {
 			const completedExercises = todaysWorkout
 				.filter((_, index) => checkedExercises[index])
 				.map((exercise) => ({
-					exercise_name: exercise.exercise_name,
+					exerciseName: exercise.exercise_name,
 					sets: exercise.sets,
 					reps: exercise.reps,
-					calories_burned: exercise.calories_burned,
+					caloriesBurned: exercise.calories_burned,
 				}));
 
 			// Calculate total calories and duration
 			const totalCaloriesBurned = completedExercises.reduce(
-				(sum, ex) => sum + ex.calories_burned,
+				(sum, ex) => sum + ex.caloriesBurned,
 				0
 			);
 

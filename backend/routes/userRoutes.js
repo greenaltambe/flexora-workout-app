@@ -2,6 +2,7 @@ import express from "express";
 import {
 	getCurrentUser,
 	completeOnboarding,
+	updateProfile,
 } from "../controllers/userController.js";
 import { isAuthenticated } from "../middleware/auth.js";
 
@@ -16,5 +17,10 @@ router.get("/me", isAuthenticated, getCurrentUser);
 // @desc    Complete user onboarding
 // @access  Private
 router.post("/onboard", isAuthenticated, completeOnboarding);
+
+// @route   PUT /api/user/profile
+// @desc    Update current user's profile
+// @access  Private
+router.put("/profile", isAuthenticated, updateProfile);
 
 export default router;

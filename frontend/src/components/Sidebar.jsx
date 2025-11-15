@@ -6,6 +6,7 @@ import {
 	MdLeaderboard,
 	MdLogout,
 	MdClose,
+	MdPerson,
 } from "react-icons/md";
 import useUserStore from "../store/userStore";
 import api from "../lib/api";
@@ -87,13 +88,25 @@ const Sidebar = ({ isOpen, onClose }) => {
 						</div>
 					</div>
 				)}
-				<button
-					onClick={handleLogout}
-					className="w-full flex items-center gap-3 px-4 py-3 mt-2 rounded-lg text-text-secondary hover:bg-red-500/10 hover:text-red-500 transition-colors"
-				>
-					<MdLogout size={24} />
-					<span className="font-medium">Logout</span>
-				</button>
+				<div className="mt-2 space-y-2">
+					<button
+						onClick={() => {
+							navigate("/profile");
+							onClose();
+						}}
+						className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:bg-gray-800 hover:text-text-primary transition-colors"
+					>
+						<MdPerson size={20} />
+						<span className="font-medium">Profile</span>
+					</button>
+					<button
+						onClick={handleLogout}
+						className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:bg-red-500/10 hover:text-red-500 transition-colors"
+					>
+						<MdLogout size={24} />
+						<span className="font-medium">Logout</span>
+					</button>
+				</div>
 			</div>
 		</div>
 	);

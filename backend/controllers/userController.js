@@ -59,4 +59,46 @@ const completeOnboarding = async (req, res) => {
 	}
 };
 
-export { getCurrentUser, completeOnboarding };
+// Update user profile
+const updateProfile = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const updates = req.body;
+
+		// Remove fields that shouldn't be updated through this endpoint
+		delete updates.googleId;
+		delete updates.googleFitTokens;
+		delete updates.isGoogleFitConnected;
+		delete updates.currentStreak;
+		delete updates.longestStreak;
+		delete updates.leaderboardScore;
+		delete updates.createdAt;
+
+		// Find user and update profile
+		const user = await User.findByIdAndUpdate(
+			userId,
+			{ $set: updates },
+			{ new: true, runValidators: true }
+		);
+
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+
+		console.log("✅ User profile updated:", user.displayName);
+
+		res.json({
+			success: true,
+			message: "Profile updated successfully",
+			user: user,
+		});
+	} catch (error) {
+		console.error("❌ Error updating profile:", error);
+		res.status(500).json({
+			error: "Failed to update profile",
+			message: error.message,
+		});
+	}
+};
+
+export { getCurrentUser, completeOnboarding, updateProfile };
