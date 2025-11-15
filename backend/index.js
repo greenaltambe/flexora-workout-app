@@ -11,6 +11,7 @@ import userRoutes from "./routes/userRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
 import workoutRoutes from "./routes/workoutRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
+import cors from "cors";
 
 // Configure environment variables
 dotenv.config();
@@ -24,6 +25,12 @@ configurePassport();
 // Initialize Express app
 const app = express();
 
+app.use(
+	cors({
+		origin: "http://localhost:5173", // must match client origin exactly
+		credentials: true, // allow cookies / credentialed requests
+	})
+);
 // Core Middleware
 app.use(express.json());
 app.use(cookieParser());
