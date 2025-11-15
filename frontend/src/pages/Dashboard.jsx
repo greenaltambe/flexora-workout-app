@@ -11,7 +11,7 @@ import useUserStore from "../store/userStore";
 import api from "../lib/api";
 
 const Dashboard = () => {
-	const { user, setTodaysWorkout } = useUserStore();
+	const { user, todaysWorkout, fetchAndSetTodaysWorkout } = useUserStore();
 	const navigate = useNavigate();
 
 	// Workout recommendations state
@@ -33,31 +33,32 @@ const Dashboard = () => {
 
 	// Fetch workout recommendations on component mount
 	useEffect(() => {
-		const fetchWorkoutRecommendations = async () => {
+		const loadWorkoutRecommendations = async () => {
 			setWorkoutLoading(true);
 			setWorkoutError("");
-			try {
-				const response = await api.post("/api/recommendations", {});
-				if (response.data.success) {
-					setWorkoutData(response.data.data);
-					// Save workout plan to global store
-					setTodaysWorkout(
-						response.data.data.exercise_recommendations
-					);
+
+			// Use the cached workout action
+			const result = await fetchAndSetTodaysWorkout();
+
+			if (result.success) {
+				// Get the workout from the store or from the API response
+				const workout =
+					todaysWorkout?.workout ||
+					result.data?.exercise_recommendations;
+				if (workout) {
+					setWorkoutData({ exercise_recommendations: workout });
 				}
-			} catch (err) {
-				console.error("Failed to fetch workout recommendations:", err);
+			} else {
 				setWorkoutError(
-					err.response?.data?.message ||
-						"Failed to load workout recommendations"
+					result.error || "Failed to load workout recommendations"
 				);
-			} finally {
-				setWorkoutLoading(false);
 			}
+
+			setWorkoutLoading(false);
 		};
 
-		fetchWorkoutRecommendations();
-	}, [setTodaysWorkout]);
+		loadWorkoutRecommendations();
+	}, [fetchAndSetTodaysWorkout, todaysWorkout]);
 
 	// Fetch diet suggestions when meal type is selected
 	const fetchDietSuggestions = async (mealType) => {
