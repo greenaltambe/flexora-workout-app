@@ -188,13 +188,17 @@ const History = () => {
 											</span>
 											<span className="flex items-center gap-1">
 												<MdLocalFireDepartment className="text-orange-500" />
-												{workout.totalCaloriesBurned}{" "}
+												{Math.round(
+													workout.totalCaloriesBurned
+												)}{" "}
 												cal
 											</span>
 											<span className="flex items-center gap-1">
 												<MdFitnessCenter className="text-primary" />
-												{workout.completedExercises
-													?.length || 0}{" "}
+												{workout.exercises?.length ||
+													workout.completedExercises
+														?.length ||
+													0}{" "}
 												exercises
 											</span>
 										</div>
@@ -235,54 +239,192 @@ const History = () => {
 											</h3>
 
 											<div className="space-y-3">
-												{workout.completedExercises?.map(
-													(exercise, index) => (
-														<div
-															key={index}
-															className="bg-card/50 rounded-lg p-4 border border-gray-700"
-														>
-															<div className="flex items-start justify-between gap-4">
-																<div className="flex-1">
-																	<h4 className="text-white font-semibold mb-2">
+												{/* Handle both new format (exercises) and legacy format (completedExercises) */}
+												{(
+													workout.exercises ||
+													workout.completedExercises
+												)?.map((exercise, index) => (
+													<div
+														key={index}
+														className="bg-card/50 rounded-lg p-4 border border-gray-700"
+													>
+														<div className="flex items-start justify-between gap-4 mb-3">
+															<div className="flex-1">
+																<h4 className="text-white font-semibold mb-1">
+																	{
+																		exercise.exerciseName
+																	}
+																</h4>
+																{exercise.targetMuscle && (
+																	<p className="text-xs text-text-secondary">
+																		Target:{" "}
 																		{
-																			exercise.exerciseName
+																			exercise.targetMuscle
 																		}
-																	</h4>
-																	<div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
-																		<span className="bg-primary/10 border border-primary/30 rounded px-2 py-1">
-																			{
-																				exercise.sets
-																			}{" "}
-																			sets
-																			×{" "}
-																			{
-																				exercise.reps
-																			}{" "}
-																			reps
-																		</span>
-																		<span className="flex items-center gap-1">
-																			<MdLocalFireDepartment className="text-orange-500" />
-																			{
-																				exercise.caloriesBurned
-																			}{" "}
-																			cal
-																		</span>
-																		{exercise.duration && (
-																			<span className="flex items-center gap-1">
-																				<MdTimer className="text-primary" />
-																				{
-																					exercise.duration
-																				}{" "}
-																				min
-																			</span>
-																		)}
-																	</div>
-																</div>
+																	</p>
+																)}
 															</div>
+															{exercise.caloriesBurned && (
+																<span className="flex items-center gap-1 text-sm text-orange-500">
+																	<MdLocalFireDepartment />
+																	{Math.round(
+																		exercise.caloriesBurned
+																	)}{" "}
+																	cal
+																</span>
+															)}
 														</div>
-													)
-												)}
+
+														{/* Display set-by-set details if available (new format) */}
+														{exercise.sets &&
+														Array.isArray(
+															exercise.sets
+														) &&
+														exercise.sets.length >
+															0 ? (
+															<div className="overflow-x-auto">
+																<table className="w-full text-sm">
+																	<thead>
+																		<tr className="border-b border-gray-700">
+																			<th className="text-left py-2 px-3 text-text-secondary font-medium">
+																				Set
+																			</th>
+																			{exercise
+																				.sets[0]
+																				.reps !==
+																				undefined && (
+																				<th className="text-left py-2 px-3 text-text-secondary font-medium">
+																					Reps
+																				</th>
+																			)}
+																			{exercise
+																				.sets[0]
+																				.weightKg !==
+																				undefined && (
+																				<th className="text-left py-2 px-3 text-text-secondary font-medium">
+																					Weight
+																				</th>
+																			)}
+																			{exercise
+																				.sets[0]
+																				.durationSec !==
+																				undefined && (
+																				<th className="text-left py-2 px-3 text-text-secondary font-medium">
+																					Duration
+																				</th>
+																			)}
+																		</tr>
+																	</thead>
+																	<tbody>
+																		{exercise.sets.map(
+																			(
+																				set,
+																				setIndex
+																			) => (
+																				<tr
+																					key={
+																						setIndex
+																					}
+																					className="border-b border-gray-800/50"
+																				>
+																					<td className="py-2 px-3 text-white font-medium">
+																						{setIndex +
+																							1}
+																					</td>
+																					{set.reps !==
+																						undefined && (
+																						<td className="py-2 px-3 text-text-secondary">
+																							{
+																								set.reps
+																							}
+																						</td>
+																					)}
+																					{set.weightKg !==
+																						undefined && (
+																						<td className="py-2 px-3 text-text-secondary">
+																							{
+																								set.weightKg
+																							}{" "}
+																							kg
+																						</td>
+																					)}
+																					{set.durationSec !==
+																						undefined && (
+																						<td className="py-2 px-3 text-text-secondary">
+																							{Math.floor(
+																								set.durationSec /
+																									60
+																							)}
+
+																							:
+																							{String(
+																								set.durationSec %
+																									60
+																							).padStart(
+																								2,
+																								"0"
+																							)}
+																						</td>
+																					)}
+																				</tr>
+																			)
+																		)}
+																	</tbody>
+																</table>
+															</div>
+														) : (
+															// Legacy format display
+															<div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+																<span className="bg-primary/10 border border-primary/30 rounded px-2 py-1">
+																	{
+																		exercise.sets
+																	}{" "}
+																	sets ×{" "}
+																	{
+																		exercise.reps
+																	}{" "}
+																	reps
+																</span>
+																{exercise.duration && (
+																	<span className="flex items-center gap-1">
+																		<MdTimer className="text-primary" />
+																		{
+																			exercise.duration
+																		}{" "}
+																		min
+																	</span>
+																)}
+															</div>
+														)}
+													</div>
+												))}
 											</div>
+
+											{/* Workout Rating */}
+											{workout.workoutRating && (
+												<div className="mt-4 flex items-center gap-2 text-yellow-500">
+													<span className="text-sm font-medium">
+														Rating:
+													</span>
+													<div className="flex gap-1">
+														{Array.from({
+															length: 5,
+														}).map((_, i) => (
+															<span
+																key={i}
+																className={
+																	i <
+																	workout.workoutRating
+																		? "text-yellow-500"
+																		: "text-gray-600"
+																}
+															>
+																★
+															</span>
+														))}
+													</div>
+												</div>
+											)}
 
 											{/* Notes */}
 											{workout.notes && (

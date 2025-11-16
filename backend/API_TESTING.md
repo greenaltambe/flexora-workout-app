@@ -1201,6 +1201,166 @@ curl -X POST http://localhost:8080/api/recommendations \
 
 ---
 
+## NEW FEATURES: Progressive Overload & Weekly Stats
+
+### 🆕 Progressive Overload Engine
+
+The `/api/recommendations` endpoint has been upgraded with intelligent progression tracking. It now:
+
+1. Calls the ML API to get strategic exercise recommendations
+2. Queries your workout history to find previous performance on each exercise
+3. Applies progressive overload rules (e.g., +2.5kg for weights, +10% reps for bodyweight)
+4. Returns a personalized, progressively harder workout plan
+
+**Response includes new fields:**
+
+```json
+{
+	"exercise_recommendations": [
+		{
+			"exercise": "Bench Press",
+			"sets": 3,
+			"reps": 10,
+			"recommendedWeight": 62.5, // NEW: Progressive weight
+			"lastWeight": 60, // NEW: Your last performance
+			"progression": "weight", // NEW: Type of progression
+			"hasHistory": true, // NEW: Whether we found past data
+			"lastPerformedDate": "2025-11-15T10:30:00.000Z"
+		}
+	]
+}
+```
+
+### 🆕 Enhanced Workout Logging
+
+`POST /api/logs` now supports detailed set-by-set tracking:
+
+**New Request Format (with detailed exercise tracking):**
+
+```json
+{
+	"exercises": [
+		{
+			"exerciseName": "Bench Press",
+			"sets": [
+				{ "reps": 10, "weightKg": 60 },
+				{ "reps": 10, "weightKg": 60 },
+				{ "reps": 8, "weightKg": 60 }
+			]
+		},
+		{
+			"exerciseName": "Pull-ups",
+			"sets": [{ "reps": 8 }, { "reps": 7 }, { "reps": 6 }]
+		},
+		{
+			"exerciseName": "Plank",
+			"sets": [{ "durationSec": 60 }, { "durationSec": 50 }]
+		}
+	],
+	"totalCaloriesBurned": 350,
+	"totalDuration": 45,
+	"workoutRating": 4,
+	"workoutNotes": "Felt strong! Hit new PR on bench press."
+}
+```
+
+**Example with cURL:**
+
+```bash
+curl -X POST http://localhost:8080/api/logs \
+  -H "Content-Type: application/json" \
+  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
+  -d '{
+    "exercises": [
+      {
+        "exerciseName": "Bench Press",
+        "sets": [
+          {"reps": 10, "weightKg": 60},
+          {"reps": 10, "weightKg": 60},
+          {"reps": 8, "weightKg": 60}
+        ]
+      },
+      {
+        "exerciseName": "Squats",
+        "sets": [
+          {"reps": 12, "weightKg": 80},
+          {"reps": 12, "weightKg": 80},
+          {"reps": 10, "weightKg": 80},
+          {"reps": 10, "weightKg": 80}
+        ]
+      }
+    ],
+    "totalCaloriesBurned": 450,
+    "totalDuration": 50,
+    "workoutRating": 5,
+    "workoutNotes": "New PR! Progressive overload working great."
+  }'
+```
+
+**Note:** The endpoint still supports the legacy `completedExercises` format for backward compatibility.
+
+### 🆕 Weekly Statistics
+
+**Endpoint:** `GET /api/stats/weekly`
+
+**Description:** Get comprehensive workout statistics for the last 7 days
+
+**Authentication:** Required
+
+**Response:**
+
+```json
+{
+	"success": true,
+	"data": {
+		"period": {
+			"startDate": "2025-11-09T00:00:00.000Z",
+			"endDate": "2025-11-16T23:59:59.999Z",
+			"days": 7
+		},
+		"summary": {
+			"totalWorkouts": 5,
+			"totalCaloriesBurned": 2250,
+			"totalDurationMinutes": 225,
+			"averageRating": 4.2,
+			"averageCaloriesPerWorkout": 450,
+			"averageDurationPerWorkout": 45
+		},
+		"dailyBreakdown": [
+			{
+				"date": "2025-11-16",
+				"workouts": 1,
+				"calories": 450,
+				"duration": 45
+			},
+			{
+				"date": "2025-11-15",
+				"workouts": 1,
+				"calories": 500,
+				"duration": 50
+			}
+			// ... more days
+		]
+	}
+}
+```
+
+**Example:**
+
+```bash
+curl -X GET http://localhost:8080/api/stats/weekly \
+  --cookie "connect.sid=YOUR_SESSION_COOKIE"
+```
+
+**Use Cases:**
+
+-   Display weekly progress charts in the dashboard
+-   Track workout consistency
+-   Analyze calorie expenditure trends
+-   Monitor workout duration patterns
+
+---
+
 ## Quick Test Script (Using cURL)
 
 Save this as `test.sh`:
@@ -1251,16 +1411,17 @@ Run with: `chmod +x test.sh && ./test.sh`
 
 ## API Summary
 
-| Method | Endpoint                | Auth Required | Description                   |
-| ------ | ----------------------- | ------------- | ----------------------------- |
-| GET    | `/auth/google`          | No            | Initiate Google OAuth         |
-| GET    | `/auth/google/callback` | No            | OAuth callback                |
-| GET    | `/auth/logout`          | No            | Logout user                   |
-| GET    | `/api/user/me`          | Yes           | Get current user              |
-| POST   | `/api/user/onboard`     | Yes           | Complete onboarding           |
-| POST   | `/api/recommendations`  | Yes           | Get ML recommendations        |
-| POST   | `/api/diet-suggestion`  | Yes           | Get diet & recipe suggestions |
-| POST   | `/api/logs`             | Yes           | Log workout                   |
-| GET    | `/api/logs`             | Yes           | Get workout history           |
-| GET    | `/api/leaderboard`      | No            | Get top users                 |
-| GET    | `/api/leaderboard/rank` | Yes           | Get user's rank               |
+| Method | Endpoint                | Auth Required | Description                          |
+| ------ | ----------------------- | ------------- | ------------------------------------ |
+| GET    | `/auth/google`          | No            | Initiate Google OAuth                |
+| GET    | `/auth/google/callback` | No            | OAuth callback                       |
+| GET    | `/auth/logout`          | No            | Logout user                          |
+| GET    | `/api/user/me`          | Yes           | Get current user                     |
+| POST   | `/api/user/onboard`     | Yes           | Complete onboarding                  |
+| POST   | `/api/recommendations`  | Yes           | Get ML recommendations with overload |
+| POST   | `/api/diet-suggestion`  | Yes           | Get diet & recipe suggestions        |
+| POST   | `/api/logs`             | Yes           | Log workout (detailed tracking)      |
+| GET    | `/api/logs`             | Yes           | Get workout history                  |
+| GET    | `/api/stats/weekly`     | Yes           | Get 7-day statistics (NEW)           |
+| GET    | `/api/leaderboard`      | No            | Get top users                        |
+| GET    | `/api/leaderboard/rank` | Yes           | Get user's rank                      |

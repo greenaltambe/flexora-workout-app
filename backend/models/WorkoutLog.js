@@ -10,6 +10,32 @@ const workoutLogSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now,
 	},
+	// New detailed exercise tracking structure for progressive overload
+	exercises: [
+		{
+			exerciseName: {
+				type: String,
+				required: true,
+			},
+			sets: [
+				{
+					reps: {
+						type: Number,
+						required: true,
+					},
+					weightKg: {
+						type: Number,
+						// Optional - for weighted exercises
+					},
+					durationSec: {
+						type: Number,
+						// Optional - for time-based exercises
+					},
+				},
+			],
+		},
+	],
+	// Legacy field for backwards compatibility
 	completedExercises: [
 		{
 			exerciseName: {

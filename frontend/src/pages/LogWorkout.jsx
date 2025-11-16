@@ -68,9 +68,11 @@ const LogWorkout = () => {
 				.filter((_, index) => checkedExercises[index])
 				.map((exercise) => ({
 					exerciseName: exercise.exercise_name,
-					sets: exercise.sets,
-					reps: exercise.reps,
-					caloriesBurned: exercise.calories_per_30min || 0,
+					sets: Math.round(exercise.sets),
+					reps: Math.round(exercise.reps),
+					caloriesBurned: Math.round(
+						exercise.calories_per_30min || 0
+					),
 				}));
 
 			// Calculate total calories and duration
@@ -187,7 +189,8 @@ const LogWorkout = () => {
 								<div className="flex flex-wrap gap-4">
 									<div className="bg-primary/10 border border-primary/30 rounded-lg px-4 py-2">
 										<div className="text-lg font-bold text-primary">
-											{exercise.sets} × {exercise.reps}
+											{Math.round(exercise.sets)} ×{" "}
+											{Math.round(exercise.reps)}
 										</div>
 										<div className="text-xs text-text-secondary">
 											Sets × Reps

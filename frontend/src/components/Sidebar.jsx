@@ -89,16 +89,20 @@ const Sidebar = ({ isOpen, onClose }) => {
 					</div>
 				)}
 				<div className="mt-2 space-y-2">
-					<button
-						onClick={() => {
-							navigate("/profile");
-							onClose();
-						}}
-						className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:bg-gray-800 hover:text-text-primary transition-colors"
+					<NavLink
+						to="/profile"
+						onClick={() => onClose()}
+						className={({ isActive }) =>
+							`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+								isActive
+									? "bg-primary text-white"
+									: "text-text-secondary hover:bg-gray-800 hover:text-text-primary"
+							}`
+						}
 					>
 						<MdPerson size={20} />
 						<span className="font-medium">Profile</span>
-					</button>
+					</NavLink>
 					<button
 						onClick={handleLogout}
 						className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:bg-red-500/10 hover:text-red-500 transition-colors"

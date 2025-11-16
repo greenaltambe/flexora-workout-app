@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Leaderboard from "./pages/Leaderboard";
 import LogWorkout from "./pages/LogWorkout";
+import ActiveWorkoutPage from "./pages/ActiveWorkoutPage";
 import ProfilePage from "./pages/ProfilePage";
 import useUserStore from "./store/userStore";
 import api from "./lib/api";
@@ -79,6 +80,10 @@ function App() {
 					<Route path="history" element={<History />} />
 					<Route path="leaderboard" element={<Leaderboard />} />
 					<Route path="log-workout" element={<LogWorkout />} />
+					<Route
+						path="workout/active"
+						element={<ActiveWorkoutPage />}
+					/>
 					<Route path="profile" element={<ProfilePage />} />
 				</Route>
 

@@ -15,6 +15,7 @@ import recommendationRoutes from "./routes/recommendationRoutes.js";
 import workoutRoutes from "./routes/workoutRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import dietRoutes from "./routes/dietRoutes.js";
+import statsRoutes from "./routes/statsRoutes.js";
 import cors from "cors";
 
 // Configure environment variables
@@ -83,6 +84,7 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/logs", workoutRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/diet-suggestion", dietRoutes);
+app.use("/api/stats", statsRoutes);
 
 // --- TEMPORARILY DISABLED: GOOGLE FIT INTEGRATION ---
 // TODO: Re-enable these routes after resolving Google Cloud Console configuration issues.

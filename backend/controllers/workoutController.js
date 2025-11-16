@@ -6,7 +6,8 @@ const logWorkout = async (req, res) => {
 	try {
 		const userId = req.user._id;
 		const {
-			completedExercises,
+			exercises, // New detailed structure
+			completedExercises, // Legacy support
 			notes,
 			workoutRating,
 			workoutNotes,
@@ -14,8 +15,11 @@ const logWorkout = async (req, res) => {
 			totalDuration,
 		} = req.body;
 
+		// Support both new and legacy formats
+		const exercisesToLog = exercises || completedExercises;
+
 		// Validate input
-		if (!completedExercises || completedExercises.length === 0) {
+		if (!exercisesToLog || exercisesToLog.length === 0) {
 			return res.status(400).json({
 				error: "Invalid workout log",
 				message: "Please provide at least one completed exercise",
@@ -33,26 +37,42 @@ const logWorkout = async (req, res) => {
 			});
 		}
 
-		// Create and save workout log
-		const workoutLog = new WorkoutLog({
+		// Build workout log with both new and legacy structures
+		const workoutLogData = {
 			userId,
-			completedExercises,
-			notes: notes || workoutNotes, // Support both fields for backwards compatibility
+			notes: notes || workoutNotes,
 			workoutNotes,
 			workoutRating,
 			totalCaloriesBurned:
 				totalCaloriesBurned ||
-				completedExercises.reduce(
-					(sum, ex) => sum + (ex.caloriesBurned || 0),
-					0
-				),
+				(completedExercises
+					? completedExercises.reduce(
+							(sum, ex) => sum + (ex.caloriesBurned || 0),
+							0
+					  )
+					: 0),
 			totalDuration:
 				totalDuration ||
-				completedExercises.reduce(
-					(sum, ex) => sum + (ex.duration || 0),
-					0
-				),
-		});
+				(completedExercises
+					? completedExercises.reduce(
+							(sum, ex) => sum + (ex.duration || 0),
+							0
+					  )
+					: 0),
+		};
+
+		// Add appropriate exercise structure based on input
+		if (exercises) {
+			// New detailed structure with set-by-set tracking
+			workoutLogData.exercises = exercises;
+		}
+		if (completedExercises) {
+			// Legacy structure for backwards compatibility
+			workoutLogData.completedExercises = completedExercises;
+		}
+
+		// Create and save workout log
+		const workoutLog = new WorkoutLog(workoutLogData);
 
 		await workoutLog.save();
 		console.log("✅ Workout log saved:", workoutLog._id);

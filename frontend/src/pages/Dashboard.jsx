@@ -8,10 +8,13 @@ import {
 	MdTrendingUp,
 } from "react-icons/md";
 import useUserStore from "../store/userStore";
+import useWorkoutStore from "../store/workoutStore";
 import api from "../lib/api";
+import WeeklyProgress from "../components/WeeklyProgress";
 
 const Dashboard = () => {
 	const { user, todaysWorkout, fetchAndSetTodaysWorkout } = useUserStore();
+	const { startWorkout } = useWorkoutStore();
 	const navigate = useNavigate();
 
 	// Workout recommendations state
@@ -88,7 +91,11 @@ const Dashboard = () => {
 	};
 
 	const handleLogWorkout = () => {
-		navigate("/log-workout");
+		// Initialize the workout store with today's workout plan
+		if (todaysWorkout && todaysWorkout.recommendedExercises) {
+			startWorkout(todaysWorkout.recommendedExercises);
+		}
+		navigate("/workout/active");
 	};
 
 	const containerVariants = {
@@ -122,6 +129,16 @@ const Dashboard = () => {
 				<p className="text-text-secondary text-lg">
 					Your personalized fitness plan for today
 				</p>
+			</motion.div>
+
+			{/* Weekly Progress Stats */}
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.2 }}
+				className="mb-10"
+			>
+				<WeeklyProgress />
 			</motion.div>
 
 			<motion.div
@@ -184,8 +201,9 @@ const Dashboard = () => {
 
 											<div className="bg-primary/10 border border-primary/30 rounded-lg px-4 py-3 mb-3">
 												<div className="text-2xl font-bold text-primary text-center">
-													{exercise.sets} ×{" "}
-													{exercise.reps}
+													{Math.round(exercise.sets)}{" "}
+													×{" "}
+													{Math.round(exercise.reps)}
 												</div>
 												<div className="text-xs text-text-secondary text-center">
 													Sets × Reps
