@@ -27,7 +27,7 @@ dotenv.config();
 const oauth2Client = new OAuth2Client(
 	process.env.GOOGLE_CLIENT_ID,
 	process.env.GOOGLE_CLIENT_SECRET,
-	"http://localhost:8080/connect/google-fit/callback"
+	process.env.GOOGLE_CLIENT_CALLBACK_URL
 );
 
 // Connect to MongoDB
@@ -41,7 +41,7 @@ const app = express();
 
 app.use(
 	cors({
-		origin: "http://localhost:5173", // must match client origin exactly
+		origin: process.env.CLIENT_URL, // must match client origin exactly
 		credentials: true, // allow cookies / credentialed requests
 	})
 );

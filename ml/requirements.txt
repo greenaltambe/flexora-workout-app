@@ -13,3 +13,6 @@ flask>=2.0.0
 # Visualization (for EDA)
 matplotlib
 seaborn
+
+# Production server
+gunicorn
