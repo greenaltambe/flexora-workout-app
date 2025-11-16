@@ -7,8 +7,9 @@ import {
 	FaChevronLeft,
 	FaChevronRight,
 } from "react-icons/fa";
-import { MdTimer } from "react-icons/md";
+import { MdTimer, MdInfoOutline } from "react-icons/md";
 import api from "../lib/api";
+import ExerciseDetailModal from "../components/ExerciseDetailModal";
 
 const ActiveWorkoutPage = () => {
 	const location = useLocation();
@@ -27,6 +28,7 @@ const ActiveWorkoutPage = () => {
 	const [notes, setNotes] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 	const [workoutStartTime] = useState(Date.now()); // Track overall workout start time
+	const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
 	// Redirect if no workout plan
 	useEffect(() => {
@@ -390,9 +392,18 @@ const ActiveWorkoutPage = () => {
 						Exercise {currentExerciseIndex + 1} of{" "}
 						{workoutPlan.length}
 					</p>
-					<h1 className="text-4xl font-bold text-primary text-center mb-3">
-						{currentExercise.exercise_name || "Exercise"}
-					</h1>
+					<div className="flex items-center justify-center gap-3 mb-3">
+						<h1 className="text-4xl font-bold text-primary text-center">
+							{currentExercise.exercise_name || "Exercise"}
+						</h1>
+						<button
+							onClick={() => setIsDetailModalOpen(true)}
+							className="bg-primary/20 hover:bg-primary/30 text-primary p-2 rounded-lg transition-all hover:scale-110 active:scale-95"
+							aria-label="View exercise details"
+						>
+							<MdInfoOutline className="text-2xl" />
+						</button>
+					</div>
 					<p className="text-2xl font-semibold text-center text-text-primary">
 						{recommendedSets} × {recommendedReps}
 						{recommendedWeight > 0 && ` @ ${recommendedWeight}kg`}
@@ -563,6 +574,12 @@ const ActiveWorkoutPage = () => {
 					)}
 				</motion.div>
 			</div>
+			{/* Exercise Detail Modal */}
+			<ExerciseDetailModal
+				isOpen={isDetailModalOpen}
+				onClose={() => setIsDetailModalOpen(false)}
+				exerciseName={currentExercise.exercise_name}
+			/>
 		</div>
 	);
 };

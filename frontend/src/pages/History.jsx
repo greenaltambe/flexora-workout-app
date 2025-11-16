@@ -8,6 +8,7 @@ import {
 	MdExpandMore,
 } from "react-icons/md";
 import api from "../lib/api";
+import ExerciseDetailModal from "../components/ExerciseDetailModal";
 
 const History = () => {
 	const [workouts, setWorkouts] = useState([]);
@@ -16,6 +17,10 @@ const History = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [expandedWorkout, setExpandedWorkout] = useState(null);
+
+	// Modal state for exercise details
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedExercise, setSelectedExercise] = useState(null);
 
 	const observerTarget = useRef(null);
 
@@ -246,7 +251,15 @@ const History = () => {
 												)?.map((exercise, index) => (
 													<div
 														key={index}
-														className="bg-card/50 rounded-lg p-4 border border-gray-700"
+														onClick={() => {
+															setSelectedExercise(
+																exercise.exerciseName
+															);
+															setIsModalOpen(
+																true
+															);
+														}}
+														className="bg-card/50 rounded-lg p-4 border border-gray-700 cursor-pointer hover:border-primary/50 hover:bg-card/70 transition-all"
 													>
 														<div className="flex items-start justify-between gap-4 mb-3">
 															<div className="flex-1">
@@ -490,6 +503,12 @@ const History = () => {
 					<p>You've reached the end of your workout history 🎉</p>
 				</motion.div>
 			)}
+			{/* Exercise Detail Modal */}
+			<ExerciseDetailModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				exerciseName={selectedExercise}
+			/>
 		</div>
 	);
 };

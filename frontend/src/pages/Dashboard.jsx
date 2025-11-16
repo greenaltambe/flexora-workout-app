@@ -10,10 +10,15 @@ import {
 import useUserStore from "../store/userStore";
 import api from "../lib/api";
 import WeeklyProgress from "../components/WeeklyProgress";
+import ExerciseDetailModal from "../components/ExerciseDetailModal";
 
 const Dashboard = () => {
 	const { user, todaysWorkout, fetchAndSetTodaysWorkout } = useUserStore();
 	const navigate = useNavigate();
+
+	// Modal state for exercise details
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedExercise, setSelectedExercise] = useState(null);
 
 	// Workout recommendations state
 	const [workoutData, setWorkoutData] = useState(null);
@@ -189,13 +194,19 @@ const Dashboard = () => {
 								{workoutData.exercise_recommendations?.map(
 									(exercise, index) => (
 										<motion.div
-											key={index}
+											key={`${exercise.exercise_name}-${index}`}
 											variants={cardVariants}
 											whileHover={{
 												y: -5,
 												transition: { duration: 0.2 },
 											}}
-											className="bg-card/80 backdrop-blur-xl rounded-xl border border-gray-800 p-6"
+											onClick={() => {
+												setSelectedExercise(
+													exercise.exercise_name
+												);
+												setIsModalOpen(true);
+											}}
+											className="bg-card/80 backdrop-blur-xl rounded-xl border border-gray-800 p-6 cursor-pointer hover:border-primary/50 transition-all"
 										>
 											<div className="flex items-start justify-between mb-4">
 												<h3 className="text-lg font-bold text-white flex-1">
@@ -426,6 +437,13 @@ const Dashboard = () => {
 					)}
 				</motion.section>
 			</motion.div>
+
+			{/* Exercise Detail Modal */}
+			<ExerciseDetailModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				exerciseName={selectedExercise}
+			/>
 		</div>
 	);
 };

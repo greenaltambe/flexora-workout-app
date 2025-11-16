@@ -1409,19 +1409,91 @@ Run with: `chmod +x test.sh && ./test.sh`
 
 ---
 
+## 10. Get Exercise Details (with GIF)
+
+**Endpoint:** `GET /api/exercises/details/:exerciseName`
+
+**Authentication:** Required
+
+**Description:** Fetches detailed information for a specific exercise, including an animated GIF, by proxying a request to our self-hosted ExerciseDB API on Vercel.
+
+**URL Parameter:**
+
+-   `exerciseName` (string): The name of the exercise to look up (e.g., "squat", "bench press")
+
+**Example Request:**
+
+```bash
+curl -X GET http://localhost:8080/api/exercises/details/squat \
+  --cookie "connect.sid=YOUR_SESSION_COOKIE"
+```
+
+**Example Success Response (200 OK):**
+
+```json
+{
+	"success": true,
+	"data": {
+		"name": "barbell squat",
+		"gifUrl": "http://d205bpvrqc9yn1.cloudfront.net/0043.gif",
+		"target": "glutes",
+		"equipment": "barbell",
+		"secondaryMuscles": ["quads", "hamstrings", "calves"],
+		"instructions": [
+			"Stand with your feet shoulder-width apart and the barbell resting on your upper back.",
+			"Lower your body by bending your knees and hips, keeping your back straight.",
+			"Continue lowering until your thighs are parallel to the ground.",
+			"Push through your heels to return to the starting position.",
+			"Repeat for the desired number of repetitions."
+		]
+	}
+}
+```
+
+**Example Error Response (404 Not Found):**
+
+```json
+{
+	"success": false,
+	"error": "Exercise not found",
+	"message": "No exercise found with the name \"invalid-exercise\""
+}
+```
+
+**Example Error Response (503 Service Unavailable):**
+
+```json
+{
+	"success": false,
+	"error": "Service unavailable",
+	"message": "Unable to fetch exercise details from external service"
+}
+```
+
+**Notes:**
+
+-   The endpoint uses our self-hosted ExerciseDB API deployed on Vercel
+-   Authentication uses Vercel bypass token stored in environment variables
+-   Exercise names are URL-encoded automatically
+-   Returns the first matching exercise from the database
+-   Includes an animated GIF URL for visual reference
+
+---
+
 ## API Summary
 
-| Method | Endpoint                | Auth Required | Description                          |
-| ------ | ----------------------- | ------------- | ------------------------------------ |
-| GET    | `/auth/google`          | No            | Initiate Google OAuth                |
-| GET    | `/auth/google/callback` | No            | OAuth callback                       |
-| GET    | `/auth/logout`          | No            | Logout user                          |
-| GET    | `/api/user/me`          | Yes           | Get current user                     |
-| POST   | `/api/user/onboard`     | Yes           | Complete onboarding                  |
-| POST   | `/api/recommendations`  | Yes           | Get ML recommendations with overload |
-| POST   | `/api/diet-suggestion`  | Yes           | Get diet & recipe suggestions        |
-| POST   | `/api/logs`             | Yes           | Log workout (detailed tracking)      |
-| GET    | `/api/logs`             | Yes           | Get workout history                  |
-| GET    | `/api/stats/weekly`     | Yes           | Get 7-day statistics (NEW)           |
-| GET    | `/api/leaderboard`      | No            | Get top users                        |
-| GET    | `/api/leaderboard/rank` | Yes           | Get user's rank                      |
+| Method | Endpoint                       | Auth Required | Description                          |
+| ------ | ------------------------------ | ------------- | ------------------------------------ |
+| GET    | `/auth/google`                 | No            | Initiate Google OAuth                |
+| GET    | `/auth/google/callback`        | No            | OAuth callback                       |
+| GET    | `/auth/logout`                 | No            | Logout user                          |
+| GET    | `/api/user/me`                 | Yes           | Get current user                     |
+| POST   | `/api/user/onboard`            | Yes           | Complete onboarding                  |
+| POST   | `/api/recommendations`         | Yes           | Get ML recommendations with overload |
+| POST   | `/api/diet-suggestion`         | Yes           | Get diet & recipe suggestions        |
+| POST   | `/api/logs`                    | Yes           | Log workout (detailed tracking)      |
+| GET    | `/api/logs`                    | Yes           | Get workout history                  |
+| GET    | `/api/stats/weekly`            | Yes           | Get 7-day statistics (NEW)           |
+| GET    | `/api/exercises/details/:name` | Yes           | Get exercise details with GIF        |
+| GET    | `/api/leaderboard`             | No            | Get top users                        |
+| GET    | `/api/leaderboard/rank`        | Yes           | Get user's rank                      |
