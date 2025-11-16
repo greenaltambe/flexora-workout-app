@@ -1,0 +1,822 @@
+# Flexora Frontend 🏋️‍♂️
+
+A modern, animated fitness tracking application built with React, Vite, and Tailwind CSS v4 featuring ML-powered recommendations, real-time workout tracking, and comprehensive statistics.
+
+## ✨ Features
+
+### 🔐 Authentication
+- **Google OAuth** integration
+- Session-based authentication with cookies
+- Protected routes with automatic redirects
+
+### 🤖 ML-Powered Recommendations
+- Personalized workout suggestions based on user profile
+- Experience-based exercise adaptation
+- Meal-specific diet recommendations with macros
+
+### 💪 Active Workout Tracking ⭐ NEW
+- **Tap-to-Complete Interface:** Intuitive set completion with visual feedback
+- **Individual Set Timers:** Track duration of each set with timestamps
+- **Exercise Info Modals:** View animated GIFs and instructions during workouts
+- **Automatic Navigation:** Smooth transitions between exercises
+- **Real-Time Progress:** Visual indicators for workout completion
+
+### � Comprehensive Statistics ⭐ NEW
+- **Aggregate Metrics:** Total workouts, calories burned, training time, average duration
+- **Weekly/Monthly Toggle:** Filter data by time period
+- **4 Interactive Charts:**
+  - Workouts Over Time (line chart)
+  - Calories Burned (area chart)  
+  - Workout Duration (bar chart)
+  - Exercises Distribution (pie chart)
+- **Recharts Integration:** Beautiful, responsive data visualizations
+
+### 🎬 Exercise Detail Modals ⭐ NEW
+- **Animated GIFs:** High-quality exercise demonstrations from ExerciseDB
+- **Target Muscles:** Primary and secondary muscle groups highlighted
+- **Equipment Info:** Required equipment for each exercise
+- **Detailed Instructions:** Step-by-step exercise guidance
+- **Integrated Everywhere:** Available in Dashboard, History, and Active Workout pages
+
+### 📜 History & Progress
+- **Infinite Scroll:** Seamless browsing of past workouts
+- **Detailed Logs:** View exercises, sets, reps, and ratings
+- **Workout Notes:** Read personal notes from previous sessions
+- **Clickable Exercises:** Tap to view detailed exercise information
+
+### 🏆 Leaderboard & Gamification
+- Global user rankings by XP
+- Medal icons for top 3 performers
+- Daily streak tracking
+- 10 XP per workout completion
+
+### 🎨 Beautiful UI/UX
+- **Modern Design**: Dark theme with custom color palette
+- **Smooth Animations**: Framer Motion for all transitions
+- **Glassmorphism**: Backdrop blur effects
+- **Responsive**: Mobile-first design
+
+## Tech Stack
+
+## 📱 Key Pages & Components
+
+### 1. Login Page (`/login`)
+- Animated logo and background effects
+- Google Sign-In button
+- Feature showcase with staggered animations
+- Automatic redirect if already authenticated
+
+### 2. Onboarding Page (`/onboarding`)
+- **React Hook Form** for validation
+- Clickable experience level cards (Beginner/Intermediate/Advanced)
+- Interactive workout frequency slider (1-7 days)
+- Complete user profile collection
+- Beautiful form animations
+
+### 3. Dashboard Page (`/dashboard`)
+- **Personalized Greeting** with user's name
+- **Meal Type Selector**: Choose between Breakfast, Lunch, Dinner, or Snack
+- **Exercise Recommendations**:
+  - Horizontal scrolling cards on desktop
+  - Each card shows: Exercise name, Sets × Reps, Calories burned
+  - Clickable cards open ExerciseDetailModal ⭐ NEW
+- **Meal Suggestion Card**:
+  - Large calorie display
+  - Animated macronutrient breakdown (Protein, Carbs, Fats)
+  - Progress bars with smooth fill animations
+- **Start Workout Button**: Large CTA for workout logging
+
+### 4. Active Workout Page (`/pages/ActiveWorkoutPage.jsx`) ⭐ REDESIGNED
+- **Tap-to-Complete Sets**: 
+  - Interactive set cards with tap-to-mark-complete
+  - Visual feedback on completion (green border, checkmark)
+  - Auto-timer starts after completing each set
+- **Individual Set Duration Tracking**:
+  - Each set records duration and timestamp
+  - Enables detailed performance analytics
+- **Exercise Info Button**:
+  - Info icon next to exercise name
+  - Opens ExerciseDetailModal without leaving workout
+  - View animated GIFs and instructions mid-workout
+- **Exercise Navigation**:
+  - Previous/Next buttons to move between exercises
+  - Progress indicators showing current exercise
+  - Smooth animations between transitions
+- **Workout Completion**:
+  - Rating system (1-5 stars)
+  - Optional workout notes
+  - Saves all set durations with timestamps
+
+### 5. Statistics Page (`/pages/StatsPage.jsx`) ⭐ NEW
+- **Time Period Toggle**: Switch between Weekly and Monthly views
+- **5 Stat Cards**:
+  - Total Workouts
+  - Total Calories Burned
+  - Total Time Trained
+  - Average Workout Duration
+  - Current Week/Month label
+- **4 Interactive Charts with Recharts**:
+  - **Workouts Over Time**: Line chart showing workout frequency
+  - **Calories Burned**: Area chart displaying calorie trends
+  - **Workout Duration**: Bar chart of session lengths
+  - **Exercises Distribution**: Pie chart of exercise variety
+- **Backend Integration**:
+  - Fetches from `/api/stats/totals?period=weekly|monthly`
+  - Fetches from `/api/stats/over-time?period=weekly|monthly`
+- **Responsive Design**: Adapts to mobile and desktop screens
+
+### 6. History Page (`/history`)
+- **Infinite Scroll**: Seamlessly load more workouts as you scroll
+- **Workout Cards**: Display date, duration, calories, rating
+- **Exercise List**: Shows all exercises with sets and reps
+- **Clickable Exercises**: Tap to open ExerciseDetailModal ⭐ NEW
+- **Workout Notes**: View personal notes from past sessions
+- **Filter Options**: Coming soon (by date, workout type)
+
+### 7. Leaderboard Page (`/leaderboard`)
+- **Top 10 Rankings**: Users sorted by XP
+- **Medal Icons**: Gold, silver, bronze for top 3
+- **Current User Highlight**: Your position emphasized
+- **User Stats**: XP and workout count for each user
+
+### 8. ExerciseDetailModal Component ⭐ NEW
+**Location:** `/src/components/ExerciseDetailModal.jsx`
+
+**Features:**
+- **Animated GIF Display**: High-quality exercise demonstrations from ExerciseDB
+- **Loading State**: Spinner while fetching exercise data
+- **Error Handling**: User-friendly error messages
+- **Exercise Information**:
+  - Target muscle group (with muscle icon)
+  - Required equipment (with dumbbell icon)
+  - Detailed instructions (numbered steps)
+  - Secondary muscles targeted
+- **Framer Motion Animations**: Smooth modal open/close transitions
+- **Responsive Design**: Works on all screen sizes
+- **Close Button**: Click outside or X button to close
+
+**Integration:**
+- Dashboard: Click exercise card to view details
+- History: Click exercise name in past workout
+- Active Workout: Click info icon next to exercise name
+
+**Backend API:**
+- Endpoint: `GET /api/exercises/details/:exerciseName`
+- Self-hosted ExerciseDB on Vercel
+- Vercel bypass token authentication
+- Server-side search with `/api/v1/exercises?search={term}&limit=1`
+
+## Prerequisites
+
+- Node.js 18+ or higher
+- pnpm (recommended) or npm
+- Backend API running on `http://localhost:8080`
+- ML service running on `http://localhost:5000`
+
+## Installation
+
+1. **Navigate to frontend directory:**
+```bash
+cd flexora/frontend
+```
+
+2. **Install dependencies:**    -   Horizontal scrolling cards on desktop
+
+pnpm install    -   Each card shows: Exercise name, Sets × Reps, Calories burned
+
+# or    -   Expandable details for target muscle, equipment, and benefits
+
+npm install-   **Meal Suggestion Card**:
+
+```    -   Large calorie display
+
+    -   Animated macronutrient breakdown (Protein, Carbs, Fats)
+
+3. **Create environment file:**    -   Progress bars with smooth fill animations
+
+```bash-   **Start Workout Button**: Large CTA for workout logging
+
+touch .env
+
+```#### 4. History Page (`/history`)
+
+
+
+4. **Configure environment variables:**-   Coming soon: Workout history with filtering
+
+```env
+
+VITE_API_URL=http://localhost:3000#### 5. Leaderboard Page (`/leaderboard`)
+
+````
+
+-   Coming soon: Global rankings and user stats
+
+## Running the Application
+
+### 🎭 Animations
+
+### Development Mode:
+
+````bash- **Stagger animations** on page load
+
+pnpm dev-   **Hover effects** on buttons and cards
+
+# or-   **Smooth transitions** between states
+
+npm run dev-   **Animated progress bars** for macros
+
+```-   **Expandable sections** with height animations
+
+
+
+Application runs on `http://localhost:5173`### 🗂️ State Management
+
+
+
+### Production Build:-   **Zustand** for global user state
+
+```bash-   Lightweight and performant
+
+pnpm build-   Simple API: `loginUser`, `logoutUser`, `updateUser`
+
+npm run build
+
+```### 🔌 API Integration
+
+
+
+### Preview Production Build:-   **Axios** client with base URL configuration
+
+```bash-   Session cookie support (`withCredentials: true`)
+
+pnpm preview-   Error handling and loading states
+
+npm run preview-   Backend API: `http://localhost:8080`
+
+````
+
+## 🚀 Quick Start
+
+## Project Structure
+
+### Prerequisites
+
+````
+
+frontend/-   Node.js 18+
+
+├── src/-   pnpm (recommended) or npm
+
+│   ├── App.jsx                    # Main app component with routing-   Backend API running on `http://localhost:8080`
+
+│   ├── main.jsx                   # Entry point
+
+│   ├── App.css                    # Global styles### Installation
+
+│   ├── index.css                  # Tailwind imports
+
+│   │```bash
+
+│   ├── components/# Install dependencies
+
+│   │   ├── Layout.jsx             # Main layout with sidebarpnpm install
+
+│   │   ├── Sidebar.jsx            # Navigation sidebar
+
+│   │   └── ProtectedRoute.jsx    # Auth guard for routes# Start development server
+
+│   │pnpm dev
+
+│   ├── pages/
+
+│   │   ├── Login.jsx              # Google OAuth login# Open in browser
+
+│   │   ├── Onboarding.jsx         # User profile setup# http://localhost:5173
+
+│   │   ├── Dashboard.jsx          # Main dashboard```
+
+│   │   ├── LogWorkout.jsx         # Workout confirmation
+
+│   │   ├── History.jsx            # Workout history### Build for Production
+
+│   │   ├── Leaderboard.jsx        # User rankings
+
+│   │   └── ProfilePage.jsx        # User profile settings```bash
+
+│   │# Create optimized build
+
+│   ├── lib/pnpm build
+
+│   │   └── api.js                 # Axios instance with config
+
+│   │# Preview production build
+
+│   ├── store/pnpm preview
+
+│   │   └── userStore.js           # Zustand global state```
+
+│   │
+
+│   └── assets/                    # Static assets## 🛠️ Tech Stack
+
+│
+
+├── public/                        # Public static files| Technology          | Version | Purpose                 |
+
+├── index.html                     # HTML entry point| ------------------- | ------- | ----------------------- |
+
+├── vite.config.js                 # Vite configuration| **React**           | 18.3+   | UI library              |
+
+├── tailwind.config.js             # Tailwind CSS config| **Vite**            | 7.2.2   | Build tool & dev server |
+
+├── eslint.config.js               # ESLint configuration| **Tailwind CSS**    | 4.1.17  | Styling framework       |
+
+├── package.json                   # Dependencies| **Framer Motion**   | 12.23+  | Animations              |
+
+└── README.md                      # This file| **Zustand**         | 5.0+    | State management        |
+
+```| **React Router**    | 7.9+    | Client-side routing     |
+
+| **Axios**           | 1.13+   | HTTP client             |
+
+## Key Components| **React Hook Form** | Latest  | Form validation         |
+
+| **React Icons**     | 5.5+    | Icon library            |
+
+### Authentication Flow
+
+## 📁 Project Structure
+
+1. **Login (`/login`)**
+
+   - Google OAuth button```
+
+   - Redirects to backend `/auth/google`frontend/
+
+   - Backend handles OAuth and redirects back to `/dashboard`├── src/
+
+│   ├── components/
+
+2. **Protected Routes**│   │   ├── Layout.jsx           # Main layout with sidebar
+
+   - Uses `ProtectedRoute` wrapper component│   │   ├── Sidebar.jsx          # Responsive navigation
+
+   - Checks user session via `/auth/me`│   │   └── ProtectedRoute.jsx   # Route guard
+
+   - Redirects unauthenticated users to `/login`│   ├── pages/
+
+│   │   ├── Login.jsx            # Google OAuth login
+
+3. **Onboarding (`/onboarding`)**│   │   ├── Onboarding.jsx       # Profile completion
+
+   - Collects user profile data│   │   ├── Dashboard.jsx        # Main dashboard ⭐
+
+   - Experience level selection (Beginner/Intermediate/Advanced)│   │   ├── History.jsx          # Workout history
+
+   - Workout frequency slider│   │   └── Leaderboard.jsx      # User rankings
+
+   - Workout type preference│   ├── store/
+
+   - Submits to `/user/onboard`│   │   └── userStore.js         # Zustand user store
+
+│   ├── lib/
+
+### Dashboard (`/dashboard`)│   │   └── api.js               # Axios instance
+
+│   ├── App.jsx                  # Routing configuration
+
+Main page showing personalized recommendations:│   ├── main.jsx                 # React entry point
+
+│   └── index.css                # Global styles
+
+**Features:**├── public/                      # Static assets
+
+- Personalized greeting with user's name├── tailwind.config.js           # Tailwind configuration
+
+- Meal type selector (Breakfast/Lunch/Dinner/Snack)├── vite.config.js               # Vite configuration
+
+- Exercise recommendations:└── package.json
+
+  - 4 cards with exercise details```
+
+  - Sets, reps, calories_per_30min
+
+  - Target muscle groups## 🎨 Design System
+
+  - Expandable exercise benefits
+
+- Diet suggestion card:### Colors
+
+  - Calorie display
+
+  - Macronutrient breakdown (Protein/Carbs/Fats)```javascript
+
+  - Animated progress bars{
+
+- "Start Workout" CTA button  background: '#0a0a0a',      // Dark background
+
+  card: '#1a1a1a',            // Card background
+
+**Data Flow:**  primary: '#3b82f6',         // Primary blue
+
+1. Fetches user profile on mount  'primary-hover': '#2563eb', // Primary hover
+
+2. Calls ML API `/predict` with user data + meal_type  'text-primary': '#f5f5f5',  // White text
+
+3. Caches recommendations in Zustand + localStorage  'text-secondary': '#a1a1aa' // Gray text
+
+4. Auto-refreshes daily (date-based cache validation)}
+
+````
+
+### Workout Logging (`/log-workout`)
+
+### Typography
+
+Workout confirmation and logging interface:
+
+-   Font: System font stack with sans-serif fallback
+
+**Features:**- Headings: Bold, large sizes (3xl-5xl)
+
+-   Displays today's recommended exercises- Body: Regular weight, readable sizes (sm-lg)
+
+-   Editable set/rep inputs for each exercise
+
+-   Total calories calculation## 📚 Documentation
+
+-   Workout rating (1-5 stars)
+
+-   Optional workout notes (500 char max)- **[FRONTEND_SETUP.md](./FRONTEND_SETUP.md)**: Complete setup guide
+
+-   Saves to backend `/workout/log`- **[DASHBOARD_FEATURES.md](./DASHBOARD_FEATURES.md)**: Dashboard documentation ⭐
+
+-   **[QUICKSTART.md](./QUICKSTART.md)**: Quick reference
+
+**Data Flow:**- **[COMMANDS.md](./COMMANDS.md)**: All available commands
+
+1. Loads recommendations from cache (via Dashboard)- **[STRUCTURE.md](./STRUCTURE.md)**: Folder structure details
+
+2. User confirms/edits exercise details- **[Backend_API.md](./Backend_API.md)**: Backend API reference
+
+3. User rates workout and adds notes
+
+4. Submits to backend## 🔗 Backend Integration
+
+5. Awards XP and updates leaderboard
+
+### Required Endpoints
+
+### History (`/history`)
+
+-   `GET /auth/google` - Google OAuth login
+
+View past workout logs:- `POST /api/user/onboard` - Complete user profile
+
+-   `POST /api/recommendations` - Get personalized recommendations ⭐
+
+**Features:**- `POST /api/logs` - Log workout
+
+-   List of all logged workouts- `GET /api/logs` - Get workout history
+
+-   Workout type filter- `GET /api/leaderboard` - Get top users
+
+-   Date-based filtering- `GET /api/user/me` - Get current user
+
+-   Workout details (exercises, sets, reps, ratings, notes)
+
+-   Total workout count### Authentication Flow
+
+-   Pagination support
+
+1. User clicks "Sign in with Google" on `/login`
+
+**Data Flow:**2. Backend handles OAuth and sets session cookie
+
+1. Fetches from `/workout/history` on mount3. Frontend stores user data in Zustand
+
+2. Client-side filtering by workout type4. Protected routes check `isAuthenticated`
+
+3. Displays sorted by date (newest first)
+
+## 🎯 Roadmap
+
+### Leaderboard (`/leaderboard`)
+
+### ✅ Completed
+
+Gamification and user rankings:
+
+-   [x] Authentication with Google OAuth
+
+**Features:**- [x] Responsive sidebar navigation
+
+-   Top 10 users by XP- [x] Login page with animations
+
+-   User rank display- [x] Onboarding form with validation
+
+-   Medal icons for top 3- [x] Dashboard with recommendations ⭐
+
+-   XP and workout count for each user- [x] Meal type selector
+
+-   Highlights current user's position- [x] Exercise cards with details
+
+-   [x] Meal suggestion with macros
+
+**Data Flow:**
+
+1. Fetches from `/leaderboard` on mount### 🚧 In Progress
+
+2. Backend calculates rankings from workout logs
+
+3. XP awarded per workout (10 XP per log)- [ ] Workout logging interface
+
+-   [ ] History page with filtering
+
+### Profile Page (`/profile`)- [ ] Leaderboard page
+
+User profile management:### 📅 Planned
+
+**Features:**- [ ] User profile editing
+
+-   Display current profile information- [ ] Progress charts and graphs
+
+-   Edit profile form- [ ] Exercise video tutorials
+
+-   Update workout preferences- [ ] Social features (share workouts)
+
+-   Google Fit integration section (disabled)- [ ] Dark/light theme toggle
+
+-   Logout button- [ ] PWA support
+
+-   [ ] Push notifications
+
+**Data Flow:**
+
+1. Loads user data from Zustand store## 🐛 Known Issues
+
+2. Updates via `/user/update`
+
+3. Refreshes user context after save1. **Exercise Details**: Some fields (target muscle, equipment, benefits) use placeholder data
+
+4. **Start Workout**: Only logs to console (UI pending)
+
+## State Management3. **No Offline Support**: Requires active internet connection
+
+### Zustand Store (`userStore.js`)## 🤝 Contributing
+
+**State:**1. Create a feature branch
+
+````javascript2. Make your changes
+
+{3. Test thoroughly
+
+  user: null,                    // User profile object4. Submit a pull request
+
+  isAuthenticated: false,        // Auth status
+
+  isLoading: true,              // Loading state## 📄 License
+
+  todaysWorkout: null,          // Cached ML recommendations
+
+  workoutCacheDate: null        // Cache timestampMIT License - See LICENSE file for details
+
+}
+
+```## 🙏 Acknowledgments
+
+
+
+**Actions:**-   [Vite](https://vite.dev/) for blazing fast development
+
+- `setUser(user)` - Set user profile-   [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
+
+- `clearUser()` - Clear user on logout-   [Framer Motion](https://www.framer.com/motion/) for animations
+
+- `setTodaysWorkout(workout, date)` - Cache recommendations-   [Zustand](https://zustand.docs.pmnd.rs/) for state management
+
+- `clearTodaysWorkout()` - Clear workout cache
+
+- `checkAuth()` - Verify session with backend---
+
+- `logout()` - End session
+
+**Made with ❤️ for fitness enthusiasts**
+
+**Persistence:**
+- User data saved to localStorage
+- Workout cache saved with date validation
+- Auto-loads on app initialization
+
+## Styling
+
+### Tailwind CSS v4
+
+**Custom Configuration:**
+- Dark theme by default
+- Custom color palette (primary: cyan)
+- Glassmorphism utilities (backdrop-blur)
+- Custom animations (fade-in, slide-up)
+
+**Key Classes:**
+- `glass` - Glassmorphism effect
+- `card` - Standard card styling
+- `btn` - Button base styles
+- `btn-primary` - Primary CTA buttons
+
+### Framer Motion
+
+**Animation Patterns:**
+- Page transitions: `fadeIn` variants
+- Card animations: `stagger` with delay
+- Hover effects: `scale` and `brightness`
+- Loading states: `pulse` animation
+
+**Example:**
+```jsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+>
+  {content}
+</motion.div>
+````
+
+## API Integration
+
+### Axios Configuration (`lib/api.js`)
+
+```javascript
+const api = axios.create({
+	baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+	withCredentials: true, // Send cookies with requests
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
+```
+
+**Interceptors:**
+
+-   Response error handler
+-   Automatic redirect to `/login` on 401/403
+-   Toast notifications for errors
+
+### Backend Endpoints Used
+
+| Endpoint           | Method | Purpose               |
+| ------------------ | ------ | --------------------- |
+| `/auth/google`     | GET    | Initiate Google OAuth |
+| `/auth/me`         | GET    | Check session         |
+| `/auth/logout`     | POST   | End session           |
+| `/user/onboard`    | POST   | Submit user profile   |
+| `/user/update`     | PUT    | Update profile        |
+| `/recommendations` | POST   | Get ML predictions    |
+| `/workout/log`     | POST   | Log workout           |
+| `/workout/history` | GET    | Get workout logs      |
+| `/leaderboard`     | GET    | Get user rankings     |
+| `/diet/suggest`    | POST   | Get diet suggestions  |
+
+## Environment Variables
+
+```env
+# Backend API URL
+VITE_API_URL=http://localhost:3000
+
+# Optional: Google Analytics ID
+VITE_GA_ID=
+```
+
+## Development Workflow
+
+1. **Start backend server** (port 3000)
+2. **Start ML service** (port 5000)
+3. **Start frontend dev server** (port 5173)
+4. **Access app:** `http://localhost:5173`
+
+### Hot Module Replacement (HMR)
+
+-   Changes auto-reload in browser
+-   React Fast Refresh preserves state
+-   CSS updates without full reload
+
+### Linting
+
+```bash
+pnpm lint
+npm run lint
+```
+
+## Building for Production
+
+1. **Build static assets:**
+
+```bash
+pnpm build
+```
+
+Output: `dist/` directory
+
+2. **Preview production build:**
+
+```bash
+pnpm preview
+```
+
+3. **Deploy `dist/` folder:**
+
+-   Netlify, Vercel, or any static host
+-   Configure rewrites for SPA routing
+-   Set environment variables on hosting platform
+
+## Troubleshooting
+
+### Authentication Issues
+
+-   **Problem:** Can't log in with Google
+-   **Solution:**
+    -   Check backend Google OAuth credentials
+    -   Verify redirect URIs in Google Console
+    -   Ensure cookies are enabled
+
+### API Connection Errors
+
+-   **Problem:** Network errors on API calls
+-   **Solution:**
+    -   Verify backend is running on port 3000
+    -   Check VITE_API_URL environment variable
+    -   Ensure CORS is enabled on backend
+
+### Cache Not Refreshing
+
+-   **Problem:** Stale workout recommendations
+-   **Solution:**
+    -   Clear localStorage in browser DevTools
+    -   Check date comparison logic in `userStore.js`
+    -   Verify ML API is returning data
+
+### Build Errors
+
+-   **Problem:** Build fails with dependency errors
+-   **Solution:**
+    -   Delete `node_modules` and `pnpm-lock.yaml`
+    -   Run `pnpm install` again
+    -   Check Node.js version (18+ required)
+
+## Testing
+
+### Manual Testing Checklist
+
+-   [ ] Login with Google OAuth
+-   [ ] Complete onboarding flow
+-   [ ] View dashboard recommendations
+-   [ ] Change meal type selector
+-   [ ] Log a workout with rating and notes
+-   [ ] View workout history
+-   [ ] Check leaderboard rankings
+-   [ ] Update profile information
+-   [ ] Logout and verify session cleared
+
+### Browser Compatibility
+
+-   Chrome 90+
+-   Firefox 88+
+-   Safari 14+
+-   Edge 90+
+
+## Performance Optimization
+
+-   **Code Splitting:** React.lazy for route-based splitting
+-   **Image Optimization:** WebP format in public assets
+-   **Bundle Size:** Tree-shaking with Vite
+-   **Caching:** Service worker for offline support (future)
+
+## Future Enhancements
+
+-   [ ] Real-time workout tracking with timer
+-   [ ] Exercise video demonstrations
+-   [ ] Social features (follow users, share workouts)
+-   [ ] Progressive Web App (PWA) support
+-   [ ] Dark/Light theme toggle
+-   [ ] Multi-language support
+-   [ ] Workout streak tracking
+-   [ ] Custom workout builder
+-   [ ] Integration with fitness wearables
+-   [ ] Exercise form analysis (computer vision)
+
+## Contributing
+
+1. Create feature branch
+2. Make changes
+3. Test thoroughly
+4. Submit pull request
+
+## License
+
+MIT License
+
+## Support
+
+For issues or questions, please open an issue in the repository.

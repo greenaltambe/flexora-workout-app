@@ -10,7 +10,9 @@ AI-powered fitness tracking application backend built with Node.js, Express, and
 -   📊 **Workout Logging & History**
 -   🏆 **Gamification System** (Streaks, Points, Leaderboard)
 -   🍽️ **Personalized Diet Suggestions**
--   📈 **Progress Tracking**
+-   📈 **Progress Tracking & Statistics** (Aggregate stats with time-based filtering)
+-   🎬 **ExerciseDB Integration** (Self-hosted API with animated exercise GIFs)
+-   ⚡ **Individual Set Duration Tracking** (Timestamps for workout analytics)
 
 ## Tech Stack
 
@@ -20,6 +22,7 @@ AI-powered fitness tracking application backend built with Node.js, Express, and
 -   **Authentication:** Passport.js (Google OAuth)
 -   **Session Management:** express-session
 -   **API Communication:** Axios
+-   **External APIs:** ExerciseDB (self-hosted on Vercel), Spoonacular
 
 ## Prerequisites
 
@@ -66,6 +69,10 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # External APIs (Optional)
 SPOONACULAR_API_KEY=your-spoonacular-key
+
+# ExerciseDB Configuration (Self-Hosted)
+EXERCISE_API_URL=https://exercise-db-rb8u227wj-greenal-tambes-projects.vercel.app
+VERCEL_BYPASS_TOKEN=Hqf2h780jOaFhALDKNB7JDZbiq6KLzt9
 
 # Google Fit API (Currently Disabled)
 GOOGLE_FIT_SCOPES=https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.activity.write https://www.googleapis.com/auth/fitness.body.read https://www.googleapis.com/auth/fitness.body.write
@@ -135,6 +142,11 @@ backend/
 -   `POST /api/logs` - Log a workout
 -   `GET /api/logs` - Get workout history
 
+### Statistics ⭐ NEW
+
+-   `GET /api/stats/totals?period=weekly|monthly` - Get aggregate workout statistics
+-   `GET /api/stats/over-time?period=weekly|monthly` - Get time-series workout data
+
 ### Leaderboard
 
 -   `GET /api/leaderboard` - Get leaderboard rankings
@@ -142,6 +154,10 @@ backend/
 ### Diet
 
 -   `POST /api/diet-suggestion` - Get diet suggestions
+
+### Exercise Details ⭐ NEW
+
+-   `GET /api/exercises/details/:exerciseName` - Get exercise details with animated GIF
 
 For detailed API documentation, see [API_TESTING.md](./API_TESTING.md)
 
@@ -166,10 +182,18 @@ Records completed workouts with exercises, ratings, and notes.
 **Key Fields:**
 
 -   User reference (userId)
--   Completed exercises array (name, sets, reps, calories)
+-   Completed exercises array (name, sets, reps, calories, **set_durations with timestamps**)
 -   Total metrics (calories burned, duration)
 -   User feedback (rating 1-5, notes)
 -   Timestamp
+
+**Set Duration Tracking:**
+Each set includes:
+
+-   `duration` - Time taken to complete the set in seconds
+-   `timestamp` - When the set was completed (ISO 8601 format)
+
+This enables detailed workout analytics and performance tracking.
 
 ## Features in Detail
 
@@ -199,9 +223,26 @@ Records completed workouts with exercises, ratings, and notes.
 
 -   Log multiple exercises per session
 -   Track calories burned and duration
+-   **Individual set duration tracking with timestamps**
 -   Rate workout difficulty (1-5 stars)
 -   Add personal notes
 -   Automatic gamification updates
+
+### Statistics & Analytics ⭐ NEW
+
+-   **Aggregate Stats:** Total workouts, calories burned, training time, average duration
+-   **Time-Based Filtering:** Weekly or monthly period selection
+-   **Over-Time Data:** Daily workout counts, calories, duration, and exercise distribution
+-   **Performance Metrics:** Automatically calculated from WorkoutLog collection
+
+### ExerciseDB Integration ⭐ NEW
+
+-   **Self-Hosted API:** Deployed on Vercel with bypass token authentication
+-   **Animated GIFs:** High-quality exercise demonstrations from ExerciseDB
+-   **Server-Side Search:** Efficient filtering using `/api/v1/exercises?search={term}`
+-   **Exercise Details:** Target muscles, equipment, secondary muscles, instructions
+-   **Proxy Endpoint:** Backend proxies requests to avoid CORS and rate limits
+-   **Field Mapping:** Converts ExerciseDB v1 API format to consistent response structure
 
 ## Development
 
