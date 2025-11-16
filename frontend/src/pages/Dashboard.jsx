@@ -8,13 +8,11 @@ import {
 	MdTrendingUp,
 } from "react-icons/md";
 import useUserStore from "../store/userStore";
-import useWorkoutStore from "../store/workoutStore";
 import api from "../lib/api";
 import WeeklyProgress from "../components/WeeklyProgress";
 
 const Dashboard = () => {
 	const { user, todaysWorkout, fetchAndSetTodaysWorkout } = useUserStore();
-	const { startWorkout } = useWorkoutStore();
 	const navigate = useNavigate();
 
 	// Workout recommendations state
@@ -91,11 +89,21 @@ const Dashboard = () => {
 	};
 
 	const handleLogWorkout = () => {
-		// Initialize the workout store with today's workout plan
-		if (todaysWorkout && todaysWorkout.recommendedExercises) {
-			startWorkout(todaysWorkout.recommendedExercises);
+		// Pass workout plan via navigation state
+		console.log("todaysWorkout:", todaysWorkout);
+		const workoutPlan =
+			todaysWorkout?.workout || todaysWorkout?.recommendedExercises;
+		console.log("workoutPlan to pass:", workoutPlan);
+
+		if (workoutPlan && workoutPlan.length > 0) {
+			navigate("/workout/active", { state: { workoutPlan } });
+		} else {
+			console.error("No workout plan available", {
+				todaysWorkout,
+				workoutPlan,
+			});
+			alert("No workout plan available. Please try refreshing the page.");
 		}
-		navigate("/workout/active");
 	};
 
 	const containerVariants = {

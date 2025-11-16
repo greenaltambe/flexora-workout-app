@@ -1,703 +1,568 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
-	FaDumbbell,
-	FaArrowLeft,
-	FaArrowRight,
-	FaCheck,
-	FaPlus,
-	FaTrash,
-	FaClock,
-	FaPlay,
-	FaPause,
-	FaStop,
 	FaTrophy,
 	FaStar,
+	FaChevronLeft,
+	FaChevronRight,
 } from "react-icons/fa";
-import { MdTrendingUp } from "react-icons/md";
-import useUserStore from "../store/userStore";
-import useWorkoutStore from "../store/workoutStore";
+import { MdTimer } from "react-icons/md";
 import api from "../lib/api";
 
 const ActiveWorkoutPage = () => {
+	const location = useLocation();
 	const navigate = useNavigate();
-	const { todaysWorkout } = useUserStore();
-	const {
-		exercises,
-		currentExerciseIndex,
-		exerciseLogs,
-		restTimer,
-		restTimerActive,
-		isWorkoutActive,
-		startWorkout,
-		nextExercise,
-		previousExercise,
-		addSet,
-		updateSet,
-		removeSet,
-		startRestTimer,
-		stopRestTimer,
-		pauseRestTimer,
-		resumeRestTimer,
-		setWorkoutRating,
-		setWorkoutNotes,
-		calculateDuration,
-		buildWorkoutPayload,
-		endWorkout,
-	} = useWorkoutStore();
+	const workoutPlan = location.state?.workoutPlan;
 
-	// Local state for current set input
-	const [currentSetData, setCurrentSetData] = useState({
-		reps: "",
-		weightKg: "",
-		durationSec: "",
-	});
-
-	// Finish workout modal state
-	const [showFinishModal, setShowFinishModal] = useState(false);
+	// Component State
+	const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+	const [completedSets, setCompletedSets] = useState({}); // { "exerciseIndex-setIndex": timestamp }
+	const [setStartTimes, setSetStartTimes] = useState({}); // { "exerciseIndex-setIndex": startTimestamp }
+	const [isTimerRunning, setIsTimerRunning] = useState(false);
+	const [timerSeconds, setTimerSeconds] = useState(0);
+	const [restDuration, setRestDuration] = useState(90);
+	const [isWorkoutComplete, setIsWorkoutComplete] = useState(false);
 	const [rating, setRating] = useState(0);
 	const [notes, setNotes] = useState("");
 	const [submitting, setSubmitting] = useState(false);
+	const [workoutStartTime] = useState(Date.now()); // Track overall workout start time
 
-	// Initialize workout on mount
+	// Redirect if no workout plan
 	useEffect(() => {
-		if (!todaysWorkout || !todaysWorkout.workout) {
+		if (!workoutPlan || !workoutPlan.length) {
 			navigate("/dashboard");
-			return;
 		}
+	}, [workoutPlan, navigate]);
 
-		if (!isWorkoutActive) {
-			const workoutExercises = todaysWorkout.workout.map((ex) => ({
-				name: ex.exercise || ex.exercise_name,
-				recommendedSets: Math.round(ex.sets),
-				recommendedReps: Math.round(ex.reps),
-				recommendedWeight: ex.recommendedWeight,
-				lastWeight: ex.lastWeight,
-				lastReps: Math.round(ex.lastReps),
-				progression: ex.progression,
-				hasHistory: ex.hasHistory,
-				calories: ex.calories_per_30min,
-				targetMuscle: ex.target_muscle_group,
-				benefits: ex.benefits,
-			}));
-
-			startWorkout(workoutExercises);
+	// Rest timer countdown with vibration on completion
+	useEffect(() => {
+		if (isTimerRunning && timerSeconds > 0) {
+			const interval = setInterval(() => {
+				setTimerSeconds((prev) => {
+					if (prev <= 1) {
+						setIsTimerRunning(false);
+						if (navigator.vibrate) {
+							navigator.vibrate([200, 100, 200]);
+						}
+						return 0;
+					}
+					return prev - 1;
+				});
+			}, 1000);
+			return () => clearInterval(interval);
 		}
-	}, [todaysWorkout, navigate, isWorkoutActive, startWorkout]);
+	}, [isTimerRunning, timerSeconds]);
 
-	const currentExercise = exercises[currentExerciseIndex];
-	const currentExerciseSets = exerciseLogs[currentExercise?.name]?.sets || [];
+	// Set completion toggle
+	const handleSetTap = (exerciseIndex, setIndex) => {
+		const key = `${exerciseIndex}-${setIndex}`;
+		const currentTime = Date.now();
 
-	const handleAddSet = () => {
-		if (!currentExercise) return;
+		setCompletedSets((prev) => {
+			const newState = { ...prev };
+			if (newState[key]) {
+				// Un-marking the set - remove it and its start time
+				delete newState[key];
+				setSetStartTimes((prevStart) => {
+					const newStart = { ...prevStart };
+					delete newStart[key];
+					return newStart;
+				});
+			} else {
+				// Marking the set as complete
+				// Start time = when previous set was completed, or when exercise was first viewed
+				const startTime = (() => {
+					// Check if there's a previous set for this exercise
+					if (setIndex > 0) {
+						const prevKey = `${exerciseIndex}-${setIndex - 1}`;
+						return newState[prevKey] || workoutStartTime;
+					}
+					// First set - check if any other exercise has been completed
+					const allCompletedTimes = Object.values(newState).filter(
+						(t) => typeof t === "number"
+					);
+					if (allCompletedTimes.length > 0) {
+						// Use the most recent completion time
+						return Math.max(...allCompletedTimes);
+					}
+					// Very first set of workout
+					return workoutStartTime;
+				})();
 
-		// Validate at least reps or duration
-		if (!currentSetData.reps && !currentSetData.durationSec) {
-			alert("Please enter reps or duration");
-			return;
-		}
+				// Store start time for this set
+				setSetStartTimes((prevStart) => ({
+					...prevStart,
+					[key]: startTime,
+				}));
 
-		addSet(currentExercise.name, {
-			reps: parseInt(currentSetData.reps) || 0,
-			weightKg: currentSetData.weightKg
-				? parseFloat(currentSetData.weightKg)
-				: undefined,
-			durationSec: currentSetData.durationSec
-				? parseInt(currentSetData.durationSec)
-				: undefined,
+				// Store completion time
+				newState[key] = currentTime;
+				setTimerSeconds(restDuration);
+				setIsTimerRunning(true);
+			}
+			return newState;
 		});
-
-		// Reset input fields
-		setCurrentSetData({
-			reps: currentSetData.reps,
-			weightKg: currentSetData.weightKg,
-			durationSec: "",
-		});
-
-		// Start rest timer after adding a set
-		startRestTimer(90);
 	};
 
-	const handleFinishWorkout = () => {
-		// Check if any sets were logged
-		const totalSets = Object.values(exerciseLogs).reduce(
-			(sum, log) => sum + log.sets.length,
-			0
-		);
+	const isSetComplete = (exerciseIndex, setIndex) => {
+		return !!completedSets[`${exerciseIndex}-${setIndex}`];
+	};
 
-		if (totalSets === 0) {
-			if (
-				!window.confirm("You haven't logged any sets. Finish anyway?")
-			) {
-				return;
+	const getCompletedSetsForExercise = (exerciseIndex) => {
+		const exercise = workoutPlan[exerciseIndex];
+		const recommendedSets = Math.round(exercise.recommendedSets || 3);
+		let count = 0;
+		for (let i = 0; i < recommendedSets; i++) {
+			if (isSetComplete(exerciseIndex, i)) {
+				count++;
 			}
 		}
-
-		setShowFinishModal(true);
+		return count;
 	};
 
-	const handleSubmitWorkout = async () => {
+	// Navigation handlers
+	const handlePreviousExercise = () => {
+		if (currentExerciseIndex > 0) {
+			setCurrentExerciseIndex(currentExerciseIndex - 1);
+		}
+	};
+
+	const handleNextExercise = () => {
+		if (currentExerciseIndex < workoutPlan.length - 1) {
+			setCurrentExerciseIndex(currentExerciseIndex + 1);
+		}
+	};
+
+	const handleFinishWorkoutClick = () => {
+		setIsWorkoutComplete(true);
+	};
+
+	// Submit workout
+	const handleFinishWorkout = async () => {
+		setSubmitting(true);
 		try {
-			setSubmitting(true);
+			const exercises = workoutPlan
+				.map((exercise, exerciseIndex) => {
+					const recommendedSets = Math.round(
+						exercise.recommendedSets || 3
+					);
+					const recommendedReps = Math.round(
+						exercise.recommendedReps || 10
+					);
+					const recommendedWeight = Math.round(
+						exercise.recommendedWeight || 0
+					);
 
-			// Update rating and notes in store
-			setWorkoutRating(rating);
-			setWorkoutNotes(notes);
+					const sets = [];
+					for (
+						let setIndex = 0;
+						setIndex < recommendedSets;
+						setIndex++
+					) {
+						if (isSetComplete(exerciseIndex, setIndex)) {
+							const key = `${exerciseIndex}-${setIndex}`;
+							const startTime =
+								setStartTimes[key] || workoutStartTime;
+							const completionTime = completedSets[key];
+							const durationSec = completionTime
+								? Math.round(
+										(completionTime - startTime) / 1000
+								  )
+								: 0;
 
-			// Build payload
-			const payload = buildWorkoutPayload();
+							sets.push({
+								reps: recommendedReps,
+								weightKg: recommendedWeight,
+								durationSec: Math.max(0, durationSec), // Ensure non-negative
+							});
+						}
+					}
+					if (sets.length > 0) {
+						const exerciseData = {
+							exerciseName:
+								exercise.exercise_name || "Unknown Exercise",
+							sets,
+						};
+						return exerciseData;
+					}
+					return null;
+				})
+				.filter((ex) => ex !== null);
 
-			// Submit to API
+			if (exercises.length === 0) {
+				alert(
+					"Please complete at least one set before finishing the workout."
+				);
+				setSubmitting(false);
+				return;
+			}
+
+			const payload = {
+				exercises,
+				workoutRating: rating || undefined,
+				workoutNotes: notes.trim() || undefined,
+			};
+
+			console.log("Full payload being sent:", payload);
 			await api.post("/api/logs", payload);
-
-			// End workout session
-			endWorkout();
-
-			// Navigate to history
 			navigate("/history");
 		} catch (error) {
-			console.error("Error submitting workout:", error);
+			console.error("Error logging workout:", error);
 			alert(
-				error.response?.data?.message ||
-					"Failed to log workout. Please try again."
+				`Failed to log workout: ${
+					error.response?.data?.message || error.message
+				}`
 			);
 		} finally {
 			setSubmitting(false);
 		}
 	};
 
-	if (!currentExercise) {
+	const formatTime = (seconds) => {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+	};
+
+	if (!workoutPlan || !workoutPlan.length) {
+		return null;
+	}
+
+	// === WORKOUT COMPLETE VIEW ===
+	if (isWorkoutComplete) {
+		const totalExercises = workoutPlan.length;
+		let totalSetsCompleted = 0;
+		for (let i = 0; i < workoutPlan.length; i++) {
+			totalSetsCompleted += getCompletedSetsForExercise(i);
+		}
+
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-background via-background to-card py-8 px-4">
-				<div className="max-w-4xl mx-auto text-center">
-					<p className="text-muted">Loading workout...</p>
+				<div className="max-w-md mx-auto">
+					<motion.div
+						initial={{ opacity: 0, scale: 0 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ type: "spring", duration: 0.6 }}
+						className="bg-card rounded-2xl p-8 text-center shadow-2xl"
+					>
+						{/* Trophy Animation */}
+						<motion.div
+							initial={{ scale: 0, rotate: -180 }}
+							animate={{ scale: 1, rotate: 0 }}
+							transition={{
+								type: "spring",
+								delay: 0.2,
+								duration: 0.8,
+							}}
+							className="text-yellow-400 text-7xl mb-6 flex justify-center"
+						>
+							<FaTrophy />
+						</motion.div>
+
+						<h2 className="text-4xl font-bold text-primary mb-2">
+							Workout Complete!
+						</h2>
+						<p className="text-text-secondary text-lg mb-8">
+							Outstanding effort 💪
+						</p>
+
+						{/* Stats */}
+						<div className="grid grid-cols-2 gap-4 mb-8">
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.4 }}
+								className="bg-background/50 rounded-xl p-5"
+							>
+								<div className="text-3xl font-bold text-primary">
+									{totalExercises}
+								</div>
+								<div className="text-sm text-text-secondary mt-1">
+									Exercises
+								</div>
+							</motion.div>
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.5 }}
+								className="bg-background/50 rounded-xl p-5"
+							>
+								<div className="text-3xl font-bold text-primary">
+									{totalSetsCompleted}
+								</div>
+								<div className="text-sm text-text-secondary mt-1">
+									Sets Completed
+								</div>
+							</motion.div>
+						</div>
+
+						{/* Rating */}
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.6 }}
+							className="mb-6"
+						>
+							<p className="text-sm font-semibold text-text-secondary mb-3">
+								Rate Your Workout
+							</p>
+							<div className="flex justify-center gap-3">
+								{[1, 2, 3, 4, 5].map((star) => (
+									<motion.button
+										key={star}
+										whileTap={{ scale: 0.9 }}
+										onClick={() => setRating(star)}
+										className="text-4xl transition-all"
+									>
+										<FaStar
+											className={
+												star <= rating
+													? "text-yellow-400 drop-shadow-lg"
+													: "text-gray-700"
+											}
+										/>
+									</motion.button>
+								))}
+							</div>
+						</motion.div>
+
+						{/* Notes */}
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.7 }}
+							className="mb-6"
+						>
+							<textarea
+								value={notes}
+								onChange={(e) => setNotes(e.target.value)}
+								placeholder="Add notes about your workout (optional)"
+								maxLength={500}
+								className="w-full bg-background/50 text-text-primary border-2 border-gray-700 focus:border-primary rounded-xl p-4 min-h-[120px] focus:outline-none transition-colors resize-none"
+							/>
+							<p className="text-xs text-text-secondary text-right mt-2">
+								{notes.length}/500
+							</p>
+						</motion.div>
+
+						{/* Submit Button */}
+						<motion.button
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: 0.8 }}
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							onClick={handleFinishWorkout}
+							disabled={submitting}
+							className="w-full bg-gradient-to-r from-primary to-primary-hover text-white font-bold py-5 rounded-xl hover:shadow-xl hover:shadow-primary/40 transition-all disabled:opacity-50 text-lg"
+						>
+							{submitting ? "Logging..." : "Finish & Log Workout"}
+						</motion.button>
+					</motion.div>
 				</div>
 			</div>
 		);
 	}
 
+	// === ACTIVE EXERCISE VIEW ===
+	const currentExercise = workoutPlan[currentExerciseIndex];
+
+	const recommendedSets = Math.round(currentExercise.recommendedSets || 3);
+	const recommendedReps = Math.round(currentExercise.recommendedReps || 10);
+	const recommendedWeight = Math.round(
+		currentExercise.recommendedWeight || 0
+	);
+	const hasHistory = currentExercise.hasHistory;
+	const completedSetsCount =
+		getCompletedSetsForExercise(currentExerciseIndex);
+
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-background via-background to-card py-8 px-4 sm:px-6 lg:px-8">
-			<div className="max-w-5xl mx-auto">
+		<div className="min-h-screen bg-gradient-to-br from-background via-background to-card py-6 px-4">
+			<div className="max-w-lg mx-auto">
 				{/* Header */}
 				<motion.div
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
-					className="mb-8"
+					className="mb-6"
 				>
-					<div className="flex items-center justify-between mb-4">
-						<button
-							onClick={() => {
-								if (
-									window.confirm(
-										"Are you sure you want to exit? Your progress will be lost."
-									)
-								) {
-									endWorkout();
-									navigate("/dashboard");
-								}
-							}}
-							className="text-muted hover:text-white transition-colors"
-						>
-							← Back to Dashboard
-						</button>
-						<div className="text-sm text-muted">
-							Exercise {currentExerciseIndex + 1} of{" "}
-							{exercises.length}
-						</div>
-					</div>
-
-					<h1 className="text-3xl md:text-4xl font-bold text-white">
-						Active Workout
+					<p className="text-text-secondary text-center mb-2">
+						Exercise {currentExerciseIndex + 1} of{" "}
+						{workoutPlan.length}
+					</p>
+					<h1 className="text-4xl font-bold text-primary text-center mb-3">
+						{currentExercise.exercise_name || "Exercise"}
 					</h1>
-				</motion.div>
-
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					{/* Main Exercise Card */}
-					<div className="lg:col-span-2 space-y-6">
-						<AnimatePresence mode="wait">
-							<motion.div
-								key={currentExerciseIndex}
-								initial={{ opacity: 0, x: 20 }}
-								animate={{ opacity: 1, x: 0 }}
-								exit={{ opacity: 0, x: -20 }}
-								className="bg-card/80 backdrop-blur-xl rounded-2xl border border-primary/20 p-8"
-							>
-								{/* Exercise Header */}
-								<div className="flex items-start justify-between mb-6">
-									<div>
-										<h2 className="text-3xl font-bold text-white mb-2">
-											{currentExercise.name}
-										</h2>
-										{currentExercise.targetMuscle && (
-											<p className="text-muted text-sm">
-												Target:{" "}
-												{currentExercise.targetMuscle}
-											</p>
-										)}
-									</div>
-									<FaDumbbell className="text-primary text-3xl" />
-								</div>
-
-								{/* Progressive Overload Target */}
-								{currentExercise.hasHistory && (
-									<div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-4 mb-6">
-										<div className="flex items-start gap-3">
-											<MdTrendingUp className="text-green-400 text-2xl mt-1 shrink-0" />
-											<div>
-												<h3 className="text-green-400 font-semibold mb-1">
-													Progressive Overload Target
-												</h3>
-												<p className="text-white text-lg">
-													{Math.round(
-														currentExercise.recommendedSets
-													)}{" "}
-													sets ×{" "}
-													{Math.round(
-														currentExercise.recommendedReps
-													)}{" "}
-													reps
-													{currentExercise.recommendedWeight &&
-														` @ ${currentExercise.recommendedWeight}kg`}
-												</p>
-												{currentExercise.lastWeight && (
-													<p className="text-muted text-sm mt-1">
-														Last time:{" "}
-														{
-															currentExercise.lastWeight
-														}
-														kg
-													</p>
-												)}
-												{currentExercise.lastReps && (
-													<p className="text-muted text-sm mt-1">
-														Last time:{" "}
-														{Math.round(
-															currentExercise.lastReps
-														)}{" "}
-														reps
-													</p>
-												)}
-											</div>
-										</div>
-									</div>
-								)}
-
-								{!currentExercise.hasHistory && (
-									<div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
-										<p className="text-blue-400 font-semibold mb-1">
-											Recommended Target
-										</p>
-										<p className="text-white text-lg">
-											{Math.round(
-												currentExercise.recommendedSets
-											)}{" "}
-											sets ×{" "}
-											{Math.round(
-												currentExercise.recommendedReps
-											)}{" "}
-											reps
-										</p>
-									</div>
-								)}
-
-								{/* Set Input Form */}
-								<div className="bg-background/50 rounded-xl p-6 mb-6">
-									<h3 className="text-white font-semibold mb-4">
-										Log a Set
-									</h3>
-									<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-										<div>
-											<label className="block text-muted text-sm mb-2">
-												Reps
-											</label>
-											<input
-												type="number"
-												value={currentSetData.reps}
-												onChange={(e) =>
-													setCurrentSetData({
-														...currentSetData,
-														reps: e.target.value,
-													})
-												}
-												className="w-full bg-card border border-primary/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary"
-												placeholder="12"
-											/>
-										</div>
-										<div>
-											<label className="block text-muted text-sm mb-2">
-												Weight (kg)
-											</label>
-											<input
-												type="number"
-												step="0.5"
-												value={currentSetData.weightKg}
-												onChange={(e) =>
-													setCurrentSetData({
-														...currentSetData,
-														weightKg:
-															e.target.value,
-													})
-												}
-												className="w-full bg-card border border-primary/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary"
-												placeholder="50"
-											/>
-										</div>
-										<div>
-											<label className="block text-muted text-sm mb-2">
-												Duration (sec)
-											</label>
-											<input
-												type="number"
-												value={
-													currentSetData.durationSec
-												}
-												onChange={(e) =>
-													setCurrentSetData({
-														...currentSetData,
-														durationSec:
-															e.target.value,
-													})
-												}
-												className="w-full bg-card border border-primary/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary"
-												placeholder="60"
-											/>
-										</div>
-									</div>
-									<button
-										onClick={handleAddSet}
-										className="mt-4 w-full bg-gradient-to-r from-primary to-primary-hover text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all"
-									>
-										<FaPlus /> Add Set
-									</button>
-								</div>
-
-								{/* Logged Sets Table */}
-								<div>
-									<h3 className="text-white font-semibold mb-4">
-										Completed Sets (
-										{currentExerciseSets.length})
-									</h3>
-									{currentExerciseSets.length === 0 ? (
-										<p className="text-muted text-center py-8">
-											No sets logged yet
-										</p>
-									) : (
-										<div className="space-y-2">
-											{currentExerciseSets.map(
-												(set, index) => (
-													<motion.div
-														key={index}
-														initial={{
-															opacity: 0,
-															y: -10,
-														}}
-														animate={{
-															opacity: 1,
-															y: 0,
-														}}
-														className="bg-background/50 rounded-lg p-4 flex items-center justify-between"
-													>
-														<div className="flex items-center gap-6">
-															<span className="text-primary font-bold text-lg">
-																Set {index + 1}
-															</span>
-															<div className="flex gap-4 text-sm">
-																{set.reps >
-																	0 && (
-																	<span className="text-white">
-																		{
-																			set.reps
-																		}{" "}
-																		reps
-																	</span>
-																)}
-																{set.weightKg && (
-																	<span className="text-muted">
-																		@{" "}
-																		{
-																			set.weightKg
-																		}
-																		kg
-																	</span>
-																)}
-																{set.durationSec && (
-																	<span className="text-muted">
-																		{
-																			set.durationSec
-																		}
-																		s
-																	</span>
-																)}
-															</div>
-														</div>
-														<button
-															onClick={() =>
-																removeSet(
-																	currentExercise.name,
-																	index
-																)
-															}
-															className="text-red-400 hover:text-red-300 transition-colors"
-														>
-															<FaTrash />
-														</button>
-													</motion.div>
-												)
-											)}
-										</div>
-									)}
-								</div>
-
-								{/* Navigation Buttons */}
-								<div className="flex gap-4 mt-8">
-									<button
-										onClick={previousExercise}
-										disabled={currentExerciseIndex === 0}
-										className="flex-1 bg-card border border-primary/20 text-white py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary/40 transition-all"
-									>
-										<FaArrowLeft /> Previous
-									</button>
-									<button
-										onClick={nextExercise}
-										disabled={
-											currentExerciseIndex ===
-											exercises.length - 1
-										}
-										className="flex-1 bg-card border border-primary/20 text-white py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary/40 transition-all"
-									>
-										Next <FaArrowRight />
-									</button>
-								</div>
-							</motion.div>
-						</AnimatePresence>
-					</div>
-
-					{/* Sidebar */}
-					<div className="space-y-6">
-						{/* Rest Timer */}
-						<div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-primary/20 p-6">
-							<h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-								<FaClock className="text-primary" /> Rest Timer
-							</h3>
-							<div className="text-center">
-								<div className="text-5xl font-bold text-primary mb-4">
-									{Math.floor(restTimer / 60)}:
-									{(restTimer % 60)
-										.toString()
-										.padStart(2, "0")}
-								</div>
-								<div className="flex gap-2">
-									{!restTimerActive && restTimer === 0 && (
-										<>
-											<button
-												onClick={() =>
-													startRestTimer(60)
-												}
-												className="flex-1 bg-background/50 hover:bg-background text-white py-2 rounded-lg text-sm transition-colors"
-											>
-												1:00
-											</button>
-											<button
-												onClick={() =>
-													startRestTimer(90)
-												}
-												className="flex-1 bg-background/50 hover:bg-background text-white py-2 rounded-lg text-sm transition-colors"
-											>
-												1:30
-											</button>
-											<button
-												onClick={() =>
-													startRestTimer(120)
-												}
-												className="flex-1 bg-background/50 hover:bg-background text-white py-2 rounded-lg text-sm transition-colors"
-											>
-												2:00
-											</button>
-										</>
-									)}
-									{restTimerActive && (
-										<button
-											onClick={pauseRestTimer}
-											className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
-										>
-											<FaPause /> Pause
-										</button>
-									)}
-									{!restTimerActive && restTimer > 0 && (
-										<button
-											onClick={resumeRestTimer}
-											className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
-										>
-											<FaPlay /> Resume
-										</button>
-									)}
-									{restTimer > 0 && (
-										<button
-											onClick={stopRestTimer}
-											className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
-										>
-											<FaStop /> Stop
-										</button>
-									)}
-								</div>
-							</div>
-						</div>
-
-						{/* Exercise Progress */}
-						<div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-primary/20 p-6">
-							<h3 className="text-white font-semibold mb-4">
-								Workout Progress
-							</h3>
-							<div className="space-y-3">
-								{exercises.map((ex, index) => {
-									const sets =
-										exerciseLogs[ex.name]?.sets || [];
-									const isComplete =
-										sets.length >= ex.recommendedSets;
-									const isCurrent =
-										index === currentExerciseIndex;
-
-									return (
-										<button
-											key={index}
-											onClick={() =>
-												useWorkoutStore
-													.getState()
-													.goToExercise(index)
-											}
-											className={`w-full text-left p-3 rounded-lg transition-all ${
-												isCurrent
-													? "bg-primary/20 border border-primary"
-													: "bg-background/50 hover:bg-background/70"
-											}`}
-										>
-											<div className="flex items-center justify-between">
-												<span
-													className={`text-sm truncate ${
-														isCurrent
-															? "text-white font-semibold"
-															: "text-muted"
-													}`}
-												>
-													{ex.name}
-												</span>
-												<div className="flex items-center gap-2 shrink-0 ml-2">
-													<span className="text-xs text-muted">
-														{sets.length}/
-														{Math.round(
-															ex.recommendedSets
-														)}
-													</span>
-													{isComplete && (
-														<FaCheck className="text-green-400 text-sm" />
-													)}
-												</div>
-											</div>
-										</button>
-									);
-								})}
-							</div>
-						</div>
-
-						{/* Finish Workout Button */}
-						<button
-							onClick={handleFinishWorkout}
-							className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-green-500/30 transition-all"
-						>
-							<FaTrophy /> Finish Workout
-						</button>
-					</div>
-				</div>
-			</div>
-
-			{/* Finish Workout Modal */}
-			<AnimatePresence>
-				{showFinishModal && (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-						onClick={() => setShowFinishModal(false)}
-					>
+					<p className="text-2xl font-semibold text-center text-text-primary">
+						{recommendedSets} × {recommendedReps}
+						{recommendedWeight > 0 && ` @ ${recommendedWeight}kg`}
+					</p>
+				</motion.div>{" "}
+				{/* Rest Timer */}
+				<AnimatePresence>
+					{isTimerRunning && (
 						<motion.div
-							initial={{ scale: 0.9, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							exit={{ scale: 0.9, opacity: 0 }}
-							onClick={(e) => e.stopPropagation()}
-							className="bg-card rounded-2xl border border-primary/20 p-8 max-w-md w-full"
+							initial={{ opacity: 0, scale: 0.9, y: -10 }}
+							animate={{ opacity: 1, scale: 1, y: 0 }}
+							exit={{ opacity: 0, scale: 0.9, y: -10 }}
+							className="bg-orange-500/20 border-2 border-orange-500/60 rounded-2xl p-6 mb-6 text-center shadow-lg"
 						>
-							<h2 className="text-2xl font-bold text-white mb-6">
-								Rate Your Workout
-							</h2>
-
-							{/* Star Rating */}
-							<div className="mb-6">
-								<p className="text-muted mb-3">
-									How was your workout?
-								</p>
-								<div className="flex gap-2 justify-center">
-									{[1, 2, 3, 4, 5].map((star) => (
-										<button
-											key={star}
-											onClick={() => setRating(star)}
-											className="transition-transform hover:scale-110"
-										>
-											<FaStar
-												className={`text-3xl ${
-													star <= rating
-														? "text-yellow-400"
-														: "text-gray-600"
-												}`}
-											/>
-										</button>
-									))}
-								</div>
+							<div className="flex items-center justify-center gap-3 mb-2">
+								<MdTimer className="text-orange-400 text-3xl" />
+								<span className="text-text-secondary font-medium">
+									Rest Timer
+								</span>
 							</div>
-
-							{/* Notes */}
-							<div className="mb-6">
-								<label className="block text-muted mb-2">
-									Notes (Optional)
-								</label>
-								<textarea
-									value={notes}
-									onChange={(e) => setNotes(e.target.value)}
-									placeholder="How did you feel? Any PRs?"
-									maxLength={500}
-									rows={4}
-									className="w-full bg-background border border-primary/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary resize-none"
-								/>
-								<p className="text-xs text-muted mt-1">
-									{notes.length}/500
-								</p>
-							</div>
-
-							{/* Actions */}
-							<div className="flex gap-4">
-								<button
-									onClick={() => setShowFinishModal(false)}
-									disabled={submitting}
-									className="flex-1 bg-background border border-primary/20 text-white py-3 rounded-lg hover:bg-background/80 transition-colors disabled:opacity-50"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={handleSubmitWorkout}
-									disabled={submitting || rating === 0}
-									className="flex-1 bg-gradient-to-r from-primary to-primary-hover text-white font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{submitting
-										? "Saving..."
-										: "Complete Workout"}
-								</button>
+							<div className="text-5xl font-bold text-orange-400">
+								{formatTime(timerSeconds)}
 							</div>
 						</motion.div>
+					)}
+				</AnimatePresence>
+				{/* Exercise Card */}
+				<AnimatePresence mode="wait">
+					<motion.div
+						key={currentExerciseIndex}
+						initial={{ opacity: 0, x: 100 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: -100 }}
+						transition={{
+							type: "spring",
+							stiffness: 300,
+							damping: 30,
+						}}
+						className="bg-card rounded-2xl p-6 shadow-xl mb-6"
+					>
+						{/* Progressive Overload Badge */}
+						{hasHistory && (
+							<motion.div
+								initial={{ opacity: 0, scale: 0.8 }}
+								animate={{ opacity: 1, scale: 1 }}
+								className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/40 rounded-xl p-3 mb-6 text-center"
+							>
+								<p className="text-green-400 font-semibold text-sm">
+									🔥 Progressive Overload Target
+								</p>
+							</motion.div>
+						)}
+
+						{/* Rest Duration Selector */}
+						<div className="mb-6">
+							<p className="text-sm text-text-secondary mb-3 text-center">
+								Rest Duration
+							</p>
+							<div className="flex gap-2 justify-center">
+								{[60, 90, 120].map((duration) => (
+									<button
+										key={duration}
+										onClick={() =>
+											setRestDuration(duration)
+										}
+										className={`px-5 py-2 rounded-lg font-semibold transition-all ${
+											restDuration === duration
+												? "bg-primary text-white shadow-lg"
+												: "bg-background text-text-secondary hover:bg-gray-800"
+										}`}
+									>
+										{duration}s
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Set Buttons */}
+						<div className="mb-6">
+							<h3 className="text-lg font-semibold text-text-primary mb-4 text-center">
+								Tap to Complete Sets
+							</h3>
+							<div className="flex flex-wrap gap-4 justify-center">
+								{Array.from({ length: recommendedSets }).map(
+									(_, setIndex) => (
+										<motion.button
+											key={setIndex}
+											initial={{ scale: 0, opacity: 0 }}
+											animate={{ scale: 1, opacity: 1 }}
+											transition={{
+												delay: setIndex * 0.1,
+												type: "spring",
+												stiffness: 200,
+											}}
+											whileTap={{ scale: 0.85 }}
+											onClick={() =>
+												handleSetTap(
+													currentExerciseIndex,
+													setIndex
+												)
+											}
+											className={`w-20 h-20 rounded-full font-bold text-xl transition-all shadow-lg ${
+												isSetComplete(
+													currentExerciseIndex,
+													setIndex
+												)
+													? "bg-primary text-white shadow-primary/50 scale-105"
+													: "bg-background border-3 border-gray-600 text-text-secondary hover:border-primary hover:scale-105"
+											}`}
+										>
+											{setIndex + 1}
+										</motion.button>
+									)
+								)}
+							</div>
+							<motion.p
+								key={completedSetsCount}
+								initial={{ scale: 1.2, opacity: 0 }}
+								animate={{ scale: 1, opacity: 1 }}
+								className="text-center text-text-secondary mt-6 text-lg"
+							>
+								<span className="font-bold text-primary">
+									{completedSetsCount}
+								</span>{" "}
+								/ {recommendedSets} sets completed
+							</motion.p>
+						</div>
 					</motion.div>
-				)}
-			</AnimatePresence>
+				</AnimatePresence>
+				{/* Navigation Buttons */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.2 }}
+					className="flex gap-3"
+				>
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={handlePreviousExercise}
+						disabled={currentExerciseIndex === 0}
+						className="flex-1 bg-background text-text-primary font-semibold py-4 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-gray-700 hover:border-primary transition-all text-lg"
+					>
+						<FaChevronLeft />
+						Previous
+					</motion.button>
+
+					{currentExerciseIndex === workoutPlan.length - 1 ? (
+						<motion.button
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							onClick={handleFinishWorkoutClick}
+							className="flex-1 bg-gradient-to-r from-primary to-primary-hover text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-primary/40 transition-all text-lg"
+						>
+							<FaTrophy />
+							Finish Workout
+						</motion.button>
+					) : (
+						<motion.button
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							onClick={handleNextExercise}
+							className="flex-1 bg-gradient-to-r from-primary to-primary-hover text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-primary/40 transition-all text-lg"
+						>
+							Next
+							<FaChevronRight />
+						</motion.button>
+					)}
+				</motion.div>
+			</div>
 		</div>
 	);
 };
