@@ -7,6 +7,7 @@ import {
 	MdLogout,
 	MdClose,
 	MdPerson,
+	MdBarChart,
 } from "react-icons/md";
 import useUserStore from "../store/userStore";
 import api from "../lib/api";
@@ -28,6 +29,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 	const navLinks = [
 		{ to: "/dashboard", icon: MdDashboard, label: "Dashboard" },
 		{ to: "/history", icon: MdHistory, label: "History" },
+		{ to: "/stats", icon: MdBarChart, label: "Statistics" },
 		{ to: "/leaderboard", icon: MdLeaderboard, label: "Leaderboard" },
 	];
 

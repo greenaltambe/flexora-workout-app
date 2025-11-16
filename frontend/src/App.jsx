@@ -15,6 +15,7 @@ import Leaderboard from "./pages/Leaderboard";
 import LogWorkout from "./pages/LogWorkout";
 import ActiveWorkoutPage from "./pages/ActiveWorkoutPage";
 import ProfilePage from "./pages/ProfilePage";
+import StatsPage from "./pages/StatsPage";
 import useUserStore from "./store/userStore";
 import api from "./lib/api";
 import "./App.css";
@@ -78,6 +79,7 @@ function App() {
 					/>
 					<Route path="dashboard" element={<Dashboard />} />
 					<Route path="history" element={<History />} />
+					<Route path="stats" element={<StatsPage />} />
 					<Route path="leaderboard" element={<Leaderboard />} />
 					<Route path="log-workout" element={<LogWorkout />} />
 					<Route
