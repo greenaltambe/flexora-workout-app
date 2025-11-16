@@ -3,6 +3,9 @@ import { FcGoogle } from "react-icons/fc";
 import { MdFitnessCenter } from "react-icons/md";
 
 const Login = () => {
+	const backendUrl =
+		import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-card p-4 overflow-hidden">
 			{/* Animated background elements */}
@@ -89,7 +92,7 @@ const Login = () => {
 				>
 					{/* Google Sign In Button */}
 					<motion.a
-						href="http://localhost:8080/auth/google"
+						href={`${backendUrl}/auth/google`}
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
 						className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 font-semibold py-4 px-6 rounded-xl hover:shadow-lg transition-all duration-300 group"
