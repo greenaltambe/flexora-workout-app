@@ -33,6 +33,16 @@ const workoutLogSchema = new mongoose.Schema({
 					},
 				},
 			],
+			caloriesBurned: {
+				type: Number,
+				default: 0,
+				// Calories burned for this specific exercise
+			},
+			duration: {
+				type: Number,
+				default: 0,
+				// Total duration in seconds for this exercise
+			},
 		},
 	],
 	// Legacy field for backwards compatibility

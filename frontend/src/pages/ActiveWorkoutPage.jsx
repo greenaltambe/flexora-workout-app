@@ -155,8 +155,11 @@ const ActiveWorkoutPage = () => {
 					const recommendedWeight = Math.round(
 						exercise.recommendedWeight || 0
 					);
+					const caloriesPer30Min = exercise.calories_per_30min || 0;
 
 					const sets = [];
+					let totalExerciseDuration = 0; // Track total duration for this exercise
+
 					for (
 						let setIndex = 0;
 						setIndex < recommendedSets;
@@ -173,6 +176,8 @@ const ActiveWorkoutPage = () => {
 								  )
 								: 0;
 
+							totalExerciseDuration += durationSec;
+
 							sets.push({
 								reps: recommendedReps,
 								weightKg: recommendedWeight,
@@ -180,11 +185,23 @@ const ActiveWorkoutPage = () => {
 							});
 						}
 					}
+
 					if (sets.length > 0) {
+						// Calculate calories burned for this exercise based on actual duration
+						// Formula: (calories_per_30min / 1800 seconds) * actual_seconds
+						const caloriesBurned = caloriesPer30Min
+							? Math.round(
+									(caloriesPer30Min / 1800) *
+										totalExerciseDuration
+							  )
+							: 0;
+
 						const exerciseData = {
 							exerciseName:
 								exercise.exercise_name || "Unknown Exercise",
 							sets,
+							caloriesBurned, // Add calculated calories
+							duration: totalExerciseDuration, // Add total exercise duration
 						};
 						return exerciseData;
 					}
@@ -200,8 +217,20 @@ const ActiveWorkoutPage = () => {
 				return;
 			}
 
+			// Calculate totals for the entire workout
+			const totalCaloriesBurned = exercises.reduce(
+				(sum, ex) => sum + (ex.caloriesBurned || 0),
+				0
+			);
+			const totalDuration = exercises.reduce(
+				(sum, ex) => sum + (ex.duration || 0),
+				0
+			);
+
 			const payload = {
 				exercises,
+				totalCaloriesBurned, // Add total calories
+				totalDuration, // Add total duration
 				workoutRating: rating || undefined,
 				workoutNotes: notes.trim() || undefined,
 			};
