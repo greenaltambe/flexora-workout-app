@@ -1,455 +1,903 @@
-# Flexora Backend API Testing Guide
+# Flexora Backend API Documentation# Flexora Backend API Testing Guide
 
-This document contains test data and examples for all API endpoints.
-
-## Base URL
+## Base URLThis document contains test data and examples for all API endpoints.
 
 ```
-http://localhost:8080
+
+http://localhost:8080## Base URL
+
 ```
 
-## Authentication Flow
+````
 
-### 1. Initiate Google OAuth Login
+## Authenticationhttp://localhost:8080
 
-```bash
-# Open in browser
-GET http://localhost:8080/auth/google
-```
+All protected routes require session-based authentication via Google OAuth 2.0. Include credentials in requests.```
+
+
+
+---## Authentication Flow
+
+
+
+## Authentication Endpoints### 1. Initiate Google OAuth Login
+
+
+
+### 1. Google OAuth Login```bash
+
+**Endpoint:** `GET /auth/google`  # Open in browser
+
+**Description:** Initiates Google OAuth login flow  GET http://localhost:8080/auth/google
+
+**Authentication:** None  ```
+
+**Response:** Redirects to Google OAuth consent screen
 
 This will redirect to Google's login page. After successful authentication, you'll be redirected to either `/onboarding` or `/dashboard` on the frontend.
 
----
+**Example:**
 
-### 2. Logout
+```bash---
 
-```bash
-curl -X GET http://localhost:8080/auth/logout \
+# Browser redirect
+
+http://localhost:8080/auth/google### 2. Logout
+
+````
+
+```````bash
+
+---curl -X GET http://localhost:8080/auth/logout \
+
   --cookie "connect.sid=YOUR_SESSION_COOKIE"
-```
 
-**Expected Response:**
+### 2. Google OAuth Callback```
+
+**Endpoint:** `GET /auth/google/callback`
+
+**Description:** Handles Google OAuth callback  **Expected Response:**
+
+**Authentication:** None
+
+**Response:** Redirects to frontend with session cookie```json
+
+{
+
+---	"message": "Successfully logged out"
+
+}
+
+### 3. Logout```
+
+**Endpoint:** `GET /auth/logout`
+
+**Description:** Logs out user and destroys session  ---
+
+**Authentication:** Required
+
+**Response:**## User Management Routes
 
 ```json
-{
-	"message": "Successfully logged out"
+
+{### 3. Get Current User
+
+  "success": true,
+
+  "message": "Logged out successfully"**Protected Route** - Requires authentication
+
 }
-```
 
----
+``````bash
 
-## User Management Routes
-
-### 3. Get Current User
-
-**Protected Route** - Requires authentication
-
-```bash
 curl -X GET http://localhost:8080/api/user/me \
-  --cookie "connect.sid=YOUR_SESSION_COOKIE"
-```
 
-**Expected Response:**
+**Example:**  --cookie "connect.sid=YOUR_SESSION_COOKIE"
 
-```json
-{
+```bash```
+
+curl -X GET http://localhost:8080/auth/logout \
+
+  --cookie "connect.sid=your-session-id"**Expected Response:**
+
+```````
+
+````json
+
+---{
+
 	"success": true,
-	"user": {
-		"_id": "673764abc123456789",
-		"googleId": "1234567890",
-		"displayName": "John Doe",
-		"email": "john@example.com",
-		"profileImage": "https://example.com/photo.jpg",
-		"age": 28,
-		"gender": "male",
-		"weightKg": 75,
-		"heightM": 1.75,
-		"currentStreak": 5,
-		"longestStreak": 10,
-		"leaderboardScore": 150
-	}
-}
-```
 
----
+### 4. Get Current User	"user": {
 
-### 4. Complete Onboarding
+**Endpoint:** `GET /auth/me`  		"_id": "673764abc123456789",
 
-**Protected Route** - For new users to complete their profile
+**Description:** Get currently authenticated user's profile  		"googleId": "1234567890",
 
-```bash
-curl -X POST http://localhost:8080/api/user/onboard \
-  -H "Content-Type: application/json" \
-  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
-  -d '{
-    "age": 28,
-    "gender": "male",
+**Authentication:** Required  		"displayName": "John Doe",
+
+**Response:**		"email": "john@example.com",
+
+```json		"profileImage": "https://example.com/photo.jpg",
+
+{		"age": 28,
+
+  "success": true,		"gender": "male",
+
+  "user": {		"weightKg": 75,
+
+    "_id": "507f1f77bcf86cd799439011",		"heightM": 1.75,
+
+    "googleId": "1234567890",		"currentStreak": 5,
+
+    "email": "user@example.com",		"longestStreak": 10,
+
+    "displayName": "John Doe",		"leaderboardScore": 150
+
+    "profileImage": "https://...",	}
+
+    "age": 25,}
+
+    "gender": "male",```
+
     "weightKg": 75,
-    "heightM": 1.75,
-    "bodyFatPercentage": 18,
+
+    "heightM": 1.75,---
+
     "experienceLevel": 2,
-    "workoutFrequency": 4,
+
+    "workoutFrequency": 4,### 4. Complete Onboarding
+
+    "currentStreak": 5,
+
+    "longestStreak": 10,**Protected Route** - For new users to complete their profile
+
+    "leaderboardScore": 150,
+
+    "isGoogleFitConnected": false```bash
+
+  }curl -X POST http://localhost:8080/api/user/onboard \
+
+}  -H "Content-Type: application/json" \
+
+```  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
+
+  -d '{
+
+**Example:**    "age": 28,
+
+```bash    "gender": "male",
+
+curl -X GET http://localhost:8080/auth/me \    "weightKg": 75,
+
+  --cookie "connect.sid=your-session-id"    "heightM": 1.75,
+
+```    "bodyFatPercentage": 18,
+
+    "experienceLevel": 2,
+
+---    "workoutFrequency": 4,
+
     "primaryWorkoutType": "mixed",
-    "primaryDietType": "standard"
+
+## User Profile Endpoints    "primaryDietType": "standard"
+
   }'
-```
 
-**Test Data Options:**
+### 5. Onboard User```
 
-**Beginner User:**
+**Endpoint:** `POST /api/user/onboard`
 
-```json
-{
-	"age": 25,
-	"gender": "female",
-	"weightKg": 60,
-	"heightM": 1.65,
-	"bodyFatPercentage": 22,
-	"experienceLevel": 1,
-	"workoutFrequency": 2,
-	"primaryWorkoutType": "cardio",
-	"primaryDietType": "vegetarian"
-}
-```
+**Description:** Complete user onboarding with initial profile data  **Test Data Options:**
 
-**Advanced User:**
+**Authentication:** Required
+
+**Request Body:****Beginner User:**
 
 ```json
+
+{```json
+
+  "age": 25,{
+
+  "gender": "male",	"age": 25,
+
+  "weightKg": 75,	"gender": "female",
+
+  "heightM": 1.75,	"weightKg": 60,
+
+  "bodyFatPercentage": 18,	"heightM": 1.65,
+
+  "experienceLevel": 2,	"bodyFatPercentage": 22,
+
+  "workoutFrequency": 4,	"experienceLevel": 1,
+
+  "primaryWorkoutType": "strength",	"workoutFrequency": 2,
+
+  "primaryDietType": "standard"	"primaryWorkoutType": "cardio",
+
+}	"primaryDietType": "vegetarian"
+
+```}
+
+````
+
+**Response:**
+
+````json**Advanced User:**
+
 {
-	"age": 35,
-	"gender": "male",
+
+  "success": true,```json
+
+  "user": { /* updated user object */ }{
+
+}	"age": 35,
+
+```	"gender": "male",
+
 	"weightKg": 85,
-	"heightM": 1.82,
-	"bodyFatPercentage": 12,
-	"experienceLevel": 3,
-	"workoutFrequency": 6,
-	"primaryWorkoutType": "strength",
-	"primaryDietType": "keto"
-}
-```
 
-**Expected Response:**
+**Example:**	"heightM": 1.82,
 
-```json
-{
-	"success": true,
-	"message": "Onboarding completed successfully",
-	"user": {
-		"_id": "673764abc123456789",
+```bash	"bodyFatPercentage": 12,
+
+curl -X POST http://localhost:8080/api/user/onboard \	"experienceLevel": 3,
+
+  -H "Content-Type: application/json" \	"workoutFrequency": 6,
+
+  --cookie "connect.sid=your-session-id" \	"primaryWorkoutType": "strength",
+
+  -d '{	"primaryDietType": "keto"
+
+    "age": 25,}
+
+    "gender": "male",```
+
+    "weightKg": 75,
+
+    "heightM": 1.75,**Expected Response:**
+
+    "bodyFatPercentage": 18,
+
+    "experienceLevel": 2,```json
+
+    "workoutFrequency": 4,{
+
+    "primaryWorkoutType": "strength",	"success": true,
+
+    "primaryDietType": "standard"	"message": "Onboarding completed successfully",
+
+  }'	"user": {
+
+```		"_id": "673764abc123456789",
+
 		"displayName": "John Doe",
-		"age": 28,
+
+---		"age": 28,
+
 		"gender": "male",
-		"weightKg": 75,
-		"heightM": 1.75
-	}
-}
-```
 
----
+### 6. Update Profile		"weightKg": 75,
 
-## Recommendation Routes
+**Endpoint:** `PUT /api/user/profile`  		"heightM": 1.75
 
-### 5. Get Personalized Recommendations
+**Description:** Update user profile information  	}
 
-**Protected Route** - Requires completed profile
+**Authentication:** Required  }
 
-```bash
-curl -X POST http://localhost:8080/api/recommendations \
-  -H "Content-Type: application/json" \
-  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
-  -d '{
+**Request Body:** (All fields optional)```
+
+```json
+
+{---
+
+  "displayName": "John Doe",
+
+  "age": 26,## Recommendation Routes
+
+  "gender": "male",
+
+  "weightKg": 73,### 5. Get Personalized Recommendations
+
+  "heightM": 1.75,
+
+  "bodyFatPercentage": 16,**Protected Route** - Requires completed profile
+
+  "experienceLevel": 3,
+
+  "workoutFrequency": 5,```bash
+
+  "primaryWorkoutType": "cardio",curl -X POST http://localhost:8080/api/recommendations \
+
+  "primaryDietType": "keto"  -H "Content-Type: application/json" \
+
+}  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
+
+```  -d '{
+
     "meal_type": "lunch"
-  }'
-```
 
-**Test Data Options:**
+**Response:**  }'
 
-**Breakfast Recommendations:**
+```json```
+
+{
+
+  "success": true,**Test Data Options:**
+
+  "user": { /* updated user object */ }
+
+}**Breakfast Recommendations:**
+
+````
+
+````json
+
+**Example:**{
+
+```bash	"meal_type": "breakfast"
+
+curl -X PUT http://localhost:8080/api/user/profile \}
+
+  -H "Content-Type: application/json" \```
+
+  --cookie "connect.sid=your-session-id" \
+
+  -d '{"weightKg": 73, "experienceLevel": 3}'**Lunch Recommendations:**
+
+````
 
 ```json
-{
-	"meal_type": "breakfast"
-}
-```
 
-**Lunch Recommendations:**
+---{
 
-```json
-{
 	"meal_type": "lunch"
-}
+
+## Workout Recommendation Endpoints}
+
 ```
 
-**Dinner Recommendations:**
+### 7. Get Personalized Recommendations
 
-```json
-{
-	"meal_type": "dinner"
+**Endpoint:** `POST /api/recommendations` **Dinner Recommendations:**
+
+**Description:** Get personalized workout and diet recommendations from ML API
+
+**Authentication:** Required ```json
+
+**Request Body:** (Optional){
+
+````json "meal_type": "dinner"
+
+{}
+
+  "meal_type": "lunch"```
+
 }
-```
 
-**Expected Response:**
+```**Expected Response:**
 
-```json
-{
-	"success": true,
-	"data": {
-		"exercise_recommendations": [
-			{
-				"exercise_name": "Push-ups",
-				"sets": 3,
-				"reps": 12,
-				"calories_burned": 50
-			},
-			{
-				"exercise_name": "Squats",
-				"sets": 4,
-				"reps": 15,
-				"calories_burned": 80
-			}
-		],
-		"meal_recommendations": [
-			{
-				"meal_name": "Grilled Chicken Salad",
-				"calories": 450,
-				"protein": 35,
-				"carbs": 30,
-				"fats": 15
-			}
-		]
-	}
-}
-```
 
----
 
-## Diet Suggestion Routes
+**Response:**```json
 
-### 5B. Get Diet Suggestions with Recipes (Spoonacular)
+```json{
 
-**Protected Route** - Get macro targets and recipe recommendations
+{	"success": true,
 
-```bash
+  "success": true,	"data": {
+
+  "data": {		"exercise_recommendations": [
+
+    "bmi": 24.49,			{
+
+    "exercise_recommendations": [				"exercise_name": "Push-ups",
+
+      {				"sets": 3,
+
+        "exercise_name": "Bench Press",				"reps": 12,
+
+        "confidence": 0.85,				"calories_burned": 50
+
+        "sets": 3,			},
+
+        "reps": 10,			{
+
+        "calories_per_30min": 250,				"exercise_name": "Squats",
+
+        "benefit": "Builds chest strength",				"sets": 4,
+
+        "equipment_needed": "Barbell, Bench",				"reps": 15,
+
+        "target_muscle_group": "Chest",				"calories_burned": 80
+
+        "difficulty_level": "Intermediate"			}
+
+      }		],
+
+    ],		"meal_recommendations": [
+
+    "diet_suggestion": {			{
+
+      "diet_type": "standard",				"meal_name": "Grilled Chicken Salad",
+
+      "meal_type": "lunch",				"calories": 450,
+
+      "calories": 650,				"protein": 35,
+
+      "carbs": 75,				"carbs": 30,
+
+      "proteins": 40,				"fats": 15
+
+      "fats": 20			}
+
+    }		]
+
+  }	}
+
+}}
+
+````
+
+**Example:**---
+
+````bash
+
+curl -X POST http://localhost:8080/api/recommendations \## Diet Suggestion Routes
+
+  -H "Content-Type: application/json" \
+
+  --cookie "connect.sid=your-session-id" \### 5B. Get Diet Suggestions with Recipes (Spoonacular)
+
+  -d '{"meal_type": "dinner"}'
+
+```**Protected Route** - Get macro targets and recipe recommendations
+
+
+
+---```bash
+
 curl -X POST http://localhost:8080/api/diet-suggestion \
-  -H "Content-Type: application/json" \
+
+## Workout Log Endpoints  -H "Content-Type: application/json" \
+
   --cookie "connect.sid=YOUR_SESSION_COOKIE" \
-  -d '{
-    "diet_type": "keto",
-    "meal_type": "lunch"
-  }'
-```
 
-**Test Data Options:**
+### 8. Log Workout  -d '{
 
-**Keto Breakfast:**
+**Endpoint:** `POST /api/logs`      "diet_type": "keto",
 
-```json
-{
-	"diet_type": "keto",
-	"meal_type": "breakfast"
-}
-```
+**Description:** Log a completed workout with exercises, rating, and notes      "meal_type": "lunch"
 
-**Vegetarian Lunch:**
+**Authentication:** Required    }'
+
+**Request Body:**```
 
 ```json
-{
-	"diet_type": "vegetarian",
-	"meal_type": "lunch"
+
+{**Test Data Options:**
+
+  "completedExercises": [
+
+    {**Keto Breakfast:**
+
+      "exerciseName": "Bench Press",
+
+      "sets": 3,```json
+
+      "reps": 10,{
+
+      "caloriesBurned": 250	"diet_type": "keto",
+
+    },	"meal_type": "breakfast"
+
+    {}
+
+      "exerciseName": "Squats",```
+
+      "sets": 4,
+
+      "reps": 12,**Vegetarian Lunch:**
+
+      "caloriesBurned": 300
+
+    }```json
+
+  ],{
+
+  "totalCaloriesBurned": 550,	"diet_type": "vegetarian",
+
+  "totalDuration": 45,	"meal_type": "lunch"
+
+  "workoutRating": 4,}
+
+  "workoutNotes": "Great workout! Feeling strong today."```
+
 }
-```
 
-**Mediterranean Dinner:**
+```**Mediterranean Dinner:**
 
-```json
-{
-	"diet_type": "mediterranean",
-	"meal_type": "dinner"
-}
-```
 
-**Vegan Breakfast:**
 
-```json
-{
-	"diet_type": "vegan",
-	"meal_type": "breakfast"
-}
-```
+**Response:**```json
 
-**Paleo Lunch:**
+```json{
 
-```json
-{
-	"diet_type": "paleo",
-	"meal_type": "lunch"
-}
-```
+{	"diet_type": "mediterranean",
+
+  "success": true,	"meal_type": "dinner"
+
+  "message": "Workout logged successfully",}
+
+  "data": {```
+
+    "workoutLog": {
+
+      "_id": "507f1f77bcf86cd799439011",**Vegan Breakfast:**
+
+      "userId": "507f1f77bcf86cd799439012",
+
+      "completedExercises": [...],```json
+
+      "totalCaloriesBurned": 550,{
+
+      "totalDuration": 45,	"diet_type": "vegan",
+
+      "workoutRating": 4,	"meal_type": "breakfast"
+
+      "workoutNotes": "Great workout!",}
+
+      "date": "2025-11-15T10:30:00.000Z"```
+
+    },
+
+    "gamification": {**Paleo Lunch:**
+
+      "currentStreak": 6,
+
+      "longestStreak": 10,```json
+
+      "leaderboardScore": 160,{
+
+      "pointsEarned": 10	"diet_type": "paleo",
+
+    }	"meal_type": "lunch"
+
+  }}
+
+}```
+
+````
 
 **Standard Dinner:**
 
-```json
-{
-	"diet_type": "standard",
-	"meal_type": "dinner"
-}
-```
+**Example:**
 
-**Available Diet Types:**
+`bash`json
 
--   `standard`
--   `keto`
--   `paleo`
--   `vegetarian`
--   `vegan`
--   `mediterranean`
--   `other`
+curl -X POST http://localhost:8080/api/logs \{
 
-**Available Meal Types:**
+-H "Content-Type: application/json" \ "diet_type": "standard",
+
+--cookie "connect.sid=your-session-id" \ "meal_type": "dinner"
+
+-d '{}
+
+    "completedExercises": [```
+
+      {
+
+        "exerciseName": "Bench Press",**Available Diet Types:**
+
+        "sets": 3,
+
+        "reps": 10,-   `standard`
+
+        "caloriesBurned": 250-   `keto`
+
+      }-   `paleo`
+
+    ],-   `vegetarian`
+
+    "totalCaloriesBurned": 250,-   `vegan`
+
+    "totalDuration": 30,-   `mediterranean`
+
+    "workoutRating": 5,-   `other`
+
+    "workoutNotes": "Excellent session!"
+
+}'**Available Meal Types:**
+
+````
 
 -   `breakfast`
--   `lunch`
+
+----   `lunch`
+
 -   `dinner`
 
-**Expected Response:**
+### 9. Get Workout History
 
-```json
-{
-	"success": true,
-	"macro_targets": {
+**Endpoint:** `GET /api/logs?limit=10&skip=0`  **Expected Response:**
+
+**Description:** Get user's workout history with pagination
+
+**Authentication:** Required  ```json
+
+**Query Parameters:**{
+
+- `limit` (optional): Number of workouts to return (default: 10)	"success": true,
+
+- `skip` (optional): Number of workouts to skip (default: 0)	"macro_targets": {
+
 		"calories": 650,
-		"carbs": 15,
-		"proteins": 45,
-		"fats": 50
-	},
-	"recipes": [
-		{
-			"id": 716429,
-			"title": "Lemon Herb Baked Salmon",
-			"image": "https://img.spoonacular.com/recipes/716429-312x231.jpg"
-		},
-		{
-			"id": 644387,
-			"title": "Keto Chicken Skewers",
-			"image": "https://img.spoonacular.com/recipes/644387-312x231.jpg"
-		},
-		{
-			"id": 715446,
-			"title": "Avocado and Egg Salad",
-			"image": "https://img.spoonacular.com/recipes/715446-312x231.jpg"
-		}
-	]
-}
+
+**Response:**		"carbs": 15,
+
+```json		"proteins": 45,
+
+{		"fats": 50
+
+  "success": true,	},
+
+  "data": {	"recipes": [
+
+    "workouts": [		{
+
+      {			"id": 716429,
+
+        "_id": "507f1f77bcf86cd799439011",			"title": "Lemon Herb Baked Salmon",
+
+        "userId": "507f1f77bcf86cd799439012",			"image": "https://img.spoonacular.com/recipes/716429-312x231.jpg"
+
+        "completedExercises": [...],		},
+
+        "totalCaloriesBurned": 550,		{
+
+        "totalDuration": 45,			"id": 644387,
+
+        "workoutRating": 4,			"title": "Keto Chicken Skewers",
+
+        "workoutNotes": "Great workout!",			"image": "https://img.spoonacular.com/recipes/644387-312x231.jpg"
+
+        "date": "2025-11-15T10:30:00.000Z"		},
+
+      }		{
+
+    ],			"id": 715446,
+
+    "total": 25,			"title": "Avocado and Egg Salad",
+
+    "hasMore": true			"image": "https://img.spoonacular.com/recipes/715446-312x231.jpg"
+
+  }		}
+
+}	]
+
+```}
+
+````
+
+**Example:**
+
+```bash---
+
+curl -X GET "http://localhost:8080/api/logs?limit=5&skip=0" \
+
+  --cookie "connect.sid=your-session-id"## Workout Logging Routes
+
 ```
-
----
-
-## Workout Logging Routes
 
 ### 6. Log a Completed Workout
 
+---
+
 **Protected Route** - Saves workout and updates gamification stats
 
-```bash
-curl -X POST http://localhost:8080/api/logs \
-  -H "Content-Type: application/json" \
-  --cookie "connect.sid=YOUR_SESSION_COOKIE" \
-  -d '{
-    "completedExercises": [
-      {
-        "exerciseName": "Push-ups",
-        "sets": 3,
-        "reps": 15,
-        "caloriesBurned": 60,
-        "duration": 10
-      },
-      {
-        "exerciseName": "Squats",
-        "sets": 4,
-        "reps": 20,
-        "caloriesBurned": 100,
-        "duration": 15
-      }
-    ],
+## Leaderboard Endpoints
+
+````bash
+
+### 10. Get Leaderboardcurl -X POST http://localhost:8080/api/logs \
+
+**Endpoint:** `GET /api/leaderboard`    -H "Content-Type: application/json" \
+
+**Description:** Get top users by leaderboard score    --cookie "connect.sid=YOUR_SESSION_COOKIE" \
+
+**Authentication:** Required    -d '{
+
+**Response:**    "completedExercises": [
+
+```json      {
+
+{        "exerciseName": "Push-ups",
+
+  "success": true,        "sets": 3,
+
+  "data": [        "reps": 15,
+
+    {        "caloriesBurned": 60,
+
+      "_id": "507f1f77bcf86cd799439011",        "duration": 10
+
+      "displayName": "John Doe",      },
+
+      "profileImage": "https://...",      {
+
+      "leaderboardScore": 250,        "exerciseName": "Squats",
+
+      "currentStreak": 10,        "sets": 4,
+
+      "longestStreak": 15        "reps": 20,
+
+    }        "caloriesBurned": 100,
+
+  ]        "duration": 15
+
+}      }
+
+```    ],
+
     "notes": "Great workout! Felt strong today.",
-    "totalCaloriesBurned": 160,
-    "totalDuration": 25
-  }'
-```
+
+**Example:**    "totalCaloriesBurned": 160,
+
+```bash    "totalDuration": 25
+
+curl -X GET http://localhost:8080/api/leaderboard \  }'
+
+  --cookie "connect.sid=your-session-id"```
+
+````
 
 **Test Data Options:**
 
+---
+
 **Cardio Workout:**
 
-```json
-{
-	"completedExercises": [
-		{
-			"exerciseName": "Running",
-			"sets": 1,
-			"reps": 1,
-			"caloriesBurned": 300,
-			"duration": 30
-		},
-		{
+## Diet Suggestion Endpoints
+
+````json
+
+### 11. Get Diet Suggestion{
+
+**Endpoint:** `POST /api/diet-suggestion`  	"completedExercises": [
+
+**Description:** Get personalized diet recommendations  		{
+
+**Authentication:** Required  			"exerciseName": "Running",
+
+**Request Body:**			"sets": 1,
+
+```json			"reps": 1,
+
+{			"caloriesBurned": 300,
+
+  "meal_type": "breakfast"			"duration": 30
+
+}		},
+
+```		{
+
 			"exerciseName": "Jumping Jacks",
-			"sets": 3,
-			"reps": 30,
-			"caloriesBurned": 90,
-			"duration": 10
-		}
-	],
-	"notes": "Cardio day - felt energized!",
-	"totalCaloriesBurned": 390,
-	"totalDuration": 40
-}
-```
 
-**Strength Training:**
+**Response:**			"sets": 3,
 
-```json
-{
+```json			"reps": 30,
+
+{			"caloriesBurned": 90,
+
+  "success": true,			"duration": 10
+
+  "data": {		}
+
+    "diet_type": "standard",	],
+
+    "meal_type": "breakfast",	"notes": "Cardio day - felt energized!",
+
+    "calories": 450,	"totalCaloriesBurned": 390,
+
+    "carbs": 60,	"totalDuration": 40
+
+    "proteins": 25,}
+
+    "fats": 15```
+
+  }
+
+}**Strength Training:**
+
+````
+
+```````json
+
+---{
+
 	"completedExercises": [
-		{
+
+## Error Responses		{
+
 			"exerciseName": "Bench Press",
-			"sets": 4,
-			"reps": 8,
-			"caloriesBurned": 120,
-			"duration": 20
-		},
-		{
-			"exerciseName": "Deadlifts",
+
+### 400 Bad Request			"sets": 4,
+
+```json			"reps": 8,
+
+{			"caloriesBurned": 120,
+
+  "error": "Invalid input",			"duration": 20
+
+  "message": "Please provide valid data"		},
+
+}		{
+
+```			"exerciseName": "Deadlifts",
+
 			"sets": 3,
-			"reps": 6,
-			"caloriesBurned": 150,
-			"duration": 15
-		},
-		{
-			"exerciseName": "Pull-ups",
+
+### 401 Unauthorized			"reps": 6,
+
+```json			"caloriesBurned": 150,
+
+{			"duration": 15
+
+  "error": "Unauthorized. Please log in."		},
+
+}		{
+
+```			"exerciseName": "Pull-ups",
+
 			"sets": 3,
-			"reps": 10,
-			"caloriesBurned": 80,
-			"duration": 10
-		}
-	],
-	"notes": "Heavy lifting session - PR on deadlifts!",
+
+### 404 Not Found			"reps": 10,
+
+```json			"caloriesBurned": 80,
+
+{			"duration": 10
+
+  "error": "Resource not found"		}
+
+}	],
+
+```	"notes": "Heavy lifting session - PR on deadlifts!",
+
 	"totalCaloriesBurned": 350,
-	"totalDuration": 45
+
+### 500 Internal Server Error	"totalDuration": 45
+
+```json}
+
+{```
+
+  "error": "Server error",
+
+  "message": "An unexpected error occurred"**Yoga/Flexibility:**
+
 }
-```
 
-**Yoga/Flexibility:**
+``````json
 
-```json
 {
-	"completedExercises": [
+
+---	"completedExercises": [
+
 		{
-			"exerciseName": "Vinyasa Flow",
+
+## Testing with Postman			"exerciseName": "Vinyasa Flow",
+
 			"sets": 1,
-			"reps": 1,
-			"caloriesBurned": 150,
-			"duration": 45
-		},
+
+1. Visit `http://localhost:8080/auth/google` in browser to login			"reps": 1,
+
+2. Copy the `connect.sid` cookie value after login			"caloriesBurned": 150,
+
+3. Add cookie to Postman requests under "Cookies" tab			"duration": 45
+
+4. All protected routes will now work		},
+
 		{
 			"exerciseName": "Stretching",
 			"sets": 1,
@@ -462,7 +910,7 @@ curl -X POST http://localhost:8080/api/logs \
 	"totalCaloriesBurned": 200,
 	"totalDuration": 60
 }
-```
+```````
 
 **Expected Response:**
 
