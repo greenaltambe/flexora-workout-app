@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+pnpm-lock.yaml
+.env
+.env.production
+.env.development
+.env.local
+.vscode
+.git
+dist
+.DS_Store
