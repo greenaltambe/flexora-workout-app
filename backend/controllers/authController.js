@@ -7,17 +7,34 @@ const googleAuth = passport.authenticate("google", {
 
 // Google OAuth callback handler
 const googleAuthCallback = [
-	passport.authenticate("google", { failureRedirect: "/auth/failure" }),
-	(req, res) => {
-		// Check if user has completed onboarding (has required ML fields)
-		if (!req.user.age) {
-			// New user - redirect to onboarding
-			return res.redirect(`${process.env.CLIENT_URL}/#/onboarding`);
-		}
-		// Returning user - redirect to dashboard
-		res.redirect(`${process.env.CLIENT_URL}/#/dashboard`);
-	},
+  passport.authenticate("google", { failureRedirect: "/auth/failure" }),
+  (req, res) => {
+    const client = process.env.CLIENT_URL.replace(/\/$/, "");
+
+    // If user is not set for some reason, fallback to failure
+    if (!req.user) {
+      return res.redirect(`${client}/#/login`);
+    }
+
+    // Make sure session is saved to the store before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error after Google login:", err);
+        // fallback: still redirect but log error
+        return res.redirect(`${client}/#/login`);
+      }
+
+      // New user -> onboarding
+      if (!req.user.age) {
+        return res.redirect(`${client}/#/onboarding`);
+      }
+
+      // Returning user -> dashboard (hash-router friendly)
+      return res.redirect(`${client}/#/dashboard`);
+    });
+  },
 ];
+
 
 // Auth failure handler
 const authFailure = (req, res) => {
