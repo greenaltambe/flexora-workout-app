@@ -12,10 +12,10 @@ const googleAuthCallback = [
 		// Check if user has completed onboarding (has required ML fields)
 		if (!req.user.age) {
 			// New user - redirect to onboarding
-			return res.redirect(`${process.env.CLIENT_URL}/onboarding`);
+			return res.redirect(`${process.env.CLIENT_URL}/#/onboarding`);
 		}
 		// Returning user - redirect to dashboard
-		res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+		res.redirect(`${process.env.CLIENT_URL}/#/dashboard`);
 	},
 ];
 
