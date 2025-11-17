@@ -52,18 +52,20 @@ app.set('trust proxy', 1);
 
 // Session Middleware
 app.use(
-	session({
-		secret: process.env.SESSION_SECRET,
-		resave: false,
-		saveUninitialized: false,
-		cookie: {
-			secure: process.env.NODE_ENV === "production", // HTTPS only in production
-			httpOnly: true,
-			maxAge: 24 * 60 * 60 * 1000, // 24 hours
-			sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Required for cross-domain cookies
-		},
-	})
+  session({
+    name: 'sid',
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // true on Render (HTTPS)
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
 );
+
 
 // Initialize Passport
 app.use(passport.initialize());
